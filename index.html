@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat2Scenic: Iterative RAG-Based Framework for Autonomous Driving Scenario Generation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue:   #1a56db;
+      --blue-light: #ebf0ff;
+      --dark:   #111827;
+      --mid:    #374151;
+      --muted:  #6b7280;
+      --border: #e5e7eb;
+      --bg:     #f9fafb;
+      --white:  #ffffff;
+      --accent: #0ea5e9;
+      --green:  #059669;
+      --radius: 12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--white);
+      color: var(--dark);
+      line-height: 1.7;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0f1f5c 0%, #1a56db 60%, #0ea5e9 100%);
+      color: var(--white);
+      padding: 72px 24px 60px;
+      text-align: center;
+    }
+    .hero .venue {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 999px;
+      padding: 4px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-family: 'Source Serif 4', serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 600;
+      line-height: 1.25;
+      max-width: 900px;
+      margin: 0 auto 28px;
+    }
+    .hero h1 span { color: #93c5fd; }
+
+    .authors {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 10px;
+    }
+    .affiliation {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 36px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+    .btn-white  { background: var(--white); color: var(--blue); }
+    .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.6); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); }
+    .btn-disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+    .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 64px 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    h2 {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: var(--dark);
+    }
+    h2::after {
+      content: '';
+      display: block;
+      width: 48px;
+      height: 3px;
+      background: var(--blue);
+      border-radius: 2px;
+      margin-top: 8px;
+    }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: var(--dark); }
+    p  { color: var(--mid); margin-bottom: 14px; }
+
+    /* ── ABSTRACT ── */
+    .abstract-box {
+      background: var(--blue-light);
+      border-left: 4px solid var(--blue);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 28px 32px;
+      font-size: 1rem;
+      color: var(--mid);
+      line-height: 1.8;
+    }
+
+    /* ── CONTRIBUTIONS ── */
+    .contrib-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 8px;
+    }
+    .contrib-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+    }
+    .contrib-card .num {
+      width: 36px; height: 36px;
+      background: var(--blue);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+
+    /* ── FIGURE / IMAGE ── */
+    .fig { text-align: center; margin: 32px 0; }
+    .fig img {
+      max-width: 100%;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+    .fig figcaption {
+      margin-top: 12px;
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── METHOD STEPS ── */
+    .method-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      border: 1px solid var(--border);
+    }
+    .step-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: var(--blue);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--white);
+      font-size: 1.1rem;
+    }
+    .step-body h3 { margin-bottom: 4px; }
+    .step-body p  { margin-bottom: 0; font-size: 0.92rem; }
+
+    /* ── PROMPTING BADGES ── */
+    .prompt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .prompt-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--blue);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .prompt-card .tag {
+      display: inline-block;
+      background: var(--blue-light);
+      color: var(--blue);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+    .prompt-card p { font-size: 0.88rem; color: var(--muted); margin-bottom: 0; }
+
+    /* ── METRICS ── */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .metric-card {
+      text-align: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+    }
+    .metric-card .val {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--blue);
+      line-height: 1;
+    }
+    .metric-card .unit { font-size: 1rem; font-weight: 400; color: var(--muted); }
+    .metric-card .label { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; margin: 24px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th {
+      background: #1a56db;
+      color: var(--white);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+    }
+    td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--mid); }
+    tr:hover td { background: var(--blue-light); }
+    tr.best td { font-weight: 700; color: var(--dark); background: #d1fae5; }
+    .up   { color: var(--green); font-weight: 700; }
+    .sota { background: #fef3c7 !important; }
+    tr.tier-row td { background: #f1f5f9; color: var(--muted); font-size: 0.8rem; padding: 6px 14px; font-style: italic; }
+    tr.tier-row:hover td { background: #f1f5f9; }
+    .table-note { font-size: 0.78rem; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+    .sort-th { cursor: pointer; user-select: none; white-space: nowrap; }
+    .sort-th:hover { background: rgba(255,255,255,0.08); }
+    .sort-icon { font-size: 0.75rem; opacity: 0.55; margin-left: 3px; }
+    .sort-th.sort-active .sort-icon { opacity: 1; color: var(--accent); }
+    .sort-th.sort-active { color: var(--accent); }
+    .cell-best { color: #4ade80; font-weight: 700; }
+    .cell-rank { display: inline-block; background: rgba(99,179,237,0.18); color: #90cdf4; border-radius: 10px; padding: 0 7px; font-size: 0.8rem; margin-left: 4px; }
+
+    /* ── GALLERY ── */
+    .gallery-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 6px 18px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      background: var(--white);
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      color: var(--mid);
+    }
+    .tab-btn.active {
+      background: var(--blue);
+      color: var(--white);
+      border-color: var(--blue);
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .gallery-grid img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      object-fit: cover;
+      aspect-ratio: 16/9;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .gallery-grid img:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .view-panel { display: none; }
+    .view-panel.active { display: block; }
+
+    /* ── BENCHMARK ── */
+    .benchmark-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .bench-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .bench-item .bval { font-size: 1.6rem; font-weight: 700; color: var(--blue); }
+    .bench-item .blabel { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── BENCHMARK BROWSER ── */
+    .bench-search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin: 20px 0 16px;
+    }
+    .bench-search-icon {
+      position: absolute;
+      left: 12px;
+      width: 16px; height: 16px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .bench-search {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--dark);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .bench-search:focus { border-color: var(--blue); }
+    .bench-count {
+      position: absolute;
+      right: 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .bench-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .bench-tab {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--mid);
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bench-tab:hover { border-color: var(--blue); color: var(--blue); }
+    .bench-tab.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
+    .bench-tab.active .btag { background: rgba(255,255,255,0.25); color: var(--white); }
+    .btag {
+      background: var(--blue-light);
+      color: var(--blue);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+    }
+    .bench-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 12px;
+    }
+    .bench-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .bench-card:hover { border-color: var(--blue); box-shadow: 0 4px 16px rgba(26,86,219,0.10); }
+    .bench-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .bench-card-num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+    .bench-card-src {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .src-carla   { background: #dbeafe; color: #1d4ed8; }
+    .src-crash   { background: #fee2e2; color: #b91c1c; }
+    .src-precrash{ background: #fef3c7; color: #92400e; }
+    .src-r152    { background: #d1fae5; color: #065f46; }
+    .src-r157    { background: #ede9fe; color: #5b21b6; }
+    .src-r171    { background: #ffedd5; color: #c2410c; }
+    .bench-card-text {
+      font-size: 0.875rem;
+      color: var(--mid);
+      line-height: 1.6;
+      margin-top: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .bench-card.expanded .bench-card-text {
+      display: block;
+      -webkit-line-clamp: unset;
+    }
+    .bench-card-toggle {
+      font-size: 0.75rem;
+      color: var(--blue);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+    .bench-empty {
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* ── BIBTEX ── */
+    .bibtex-box {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 24px 28px;
+      border-radius: var(--radius);
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #e2e8f0;
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #111827;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.85rem;
+    }
+    footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    footer a:hover { color: var(--white); }
+
+    @media (max-width: 640px) {
+      .hero { padding: 48px 16px 40px; }
+      section { padding: 40px 0; }
+      h2 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ HERO ══════════ -->
+<header class="hero">
+  <div class="venue">IROS 2026 &nbsp;·&nbsp; Autonomous Driving</div>
+  <h1>Chat2Scenic: An Iterative <span>RAG-Based</span> Framework for<br/>Automated Driving Scenario Generation</h1>
+  <p class="authors">Anonymous Authors</p>
+  <p class="affiliation">Anonymous Institution &nbsp;·&nbsp; Under Review</p>
+  <div class="btn-row">
+    <a href="#" class="btn btn-white">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6M4.5 19.5l15-15M19.5 4.5l-15 15"/></svg>
+      Paper (Coming Soon)
+    </a>
+    <span class="btn btn-outline btn-disabled">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      Code (Coming Soon)
+    </span>
+    <a href="#benchmark" class="btn btn-outline">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M12 9v6"/></svg>
+      Benchmark
+    </a>
+  </div>
+</header>
+
+<!-- ══════════ CONCEPT FIGURE ══════════ -->
+<div class="container">
+  <figure class="fig" style="margin-top:48px;">
+    <img src="static/images/framework.png" alt="Chat2Scenic Framework Architecture" />
+    <figcaption><strong>Figure 1.</strong> Chat2Scenic framework architecture showing the Interactive Module, RAG Module, and Generation Module with iterative component-wise generation pipeline.</figcaption>
+  </figure>
+</div>
+
+<!-- ══════════ ABSTRACT ══════════ -->
+<section>
+  <div class="container">
+    <h2>Abstract</h2>
+    <div class="abstract-box">
+      Validating autonomous driving systems requires diverse, regulation-compliant test scenarios. Existing automated approaches rely on simplified inputs rather than complex regulatory descriptions, and face a fundamental trade-off: retrieval-assemble methods achieve reasonable compilation rates but lack scalability, while retrieval-based full-script generation suffers from low compilation success on diverse inputs.
+      <br/><br/>
+      We present <strong>Chat2Scenic</strong>, an iterative retrieval-augmented framework that generates executable Scenic scenario scripts directly from natural language regulatory descriptions. Chat2Scenic provides a chatbot interface for interactive scenario refinement and integrates a dual-retriever RAG architecture grounded in regulatory knowledge and DSL syntax. We additionally propose the first regulation-grounded benchmark comprising <strong>123 scenarios</strong> drawn from NHTSA, United Nations Vehicle Regulations, and the CARLA Leaderboard, together with dedicated metrics for framework-level and application-level evaluation. Chat2Scenic achieves a <strong>Compilation Success Rate of 76.42%</strong> and a <strong>Framework Accuracy of 58.17%</strong>, significantly outperforming state-of-the-art methods.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CONTRIBUTIONS ══════════ -->
+<section>
+  <div class="container">
+    <h2>Key Contributions</h2>
+    <div class="contrib-grid">
+      <div class="contrib-card">
+        <div class="num">1</div>
+        <h3>Chat2Scenic Framework</h3>
+        <p>A chatbot-based iterative component-wise generation framework combining Contextual Prompting, Chain-of-Thought, In-Context Learning, and RAG-ICL — outperforming SOTA in compilation success rate, scenario quality, and framework accuracy.</p>
+      </div>
+      <div class="contrib-card">
+        <div class="num">2</div>
+        <h3>Regulation-Grounded Benchmark</h3>
+        <p>The first benchmark of 123 ADS scenario descriptions sourced from the CARLA Leaderboard, NHTSA crash/pre-crash datasets, and UN Vehicle Regulations (R152, R157, R171), with dedicated evaluation metrics.</p>
+      </div>
+      <div class="contrib-card">
+        <div class="num">3</div>
+        <h3>Comprehensive Evaluation</h3>
+        <p>Systematic ablation across 12 prompting configurations, cross-model evaluation spanning 13 proprietary and open-source LLMs, and direct comparison against SOTA retrieval-assemble and retrieval-generation baselines.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ RESULTS ══════════ -->
+<section>
+  <div class="container">
+    <h2>Results</h2>
+    <p>All experiments use CARLA 0.9.15 + Scenic 3.1.0 on a Dell Alienware R15 (Intel i7-13700KF, NVIDIA RTX 4090, 128 GB RAM). The best configuration <strong>C11</strong> (CP + CoT + ICL + CodeICL) with Gemini-3-Flash significantly outperforms all baselines.</p>
+
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="val">76.42<span class="unit">%</span></div>
+        <div class="label">Compilation Success Rate</div>
+      </div>
+      <div class="metric-card">
+        <div class="val">76.12<span class="unit">%</span></div>
+        <div class="label">Scenario Quality</div>
+      </div>
+      <div class="metric-card">
+        <div class="val">58.17<span class="unit">%</span></div>
+        <div class="label">Framework Accuracy</div>
+      </div>
+    </div>
+
+    <!-- Ablation Table -->
+    <h3>Ablation Study (Gemini-3-Flash, C1–C12)</h3>
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:8px;">Click any numeric column header to sort. ↑ = higher is better, ↓ = lower is better.</p>
+    <div class="table-wrap">
+      <table id="ablation-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="sort-th" data-col="0" data-asc="true" onclick="sortAblation(0)">ID <span class="sort-icon">⇅</span></th>
+            <th rowspan="2">CP</th>
+            <th rowspan="2">CoT</th>
+            <th rowspan="2">ICL</th>
+            <th colspan="2" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);">RAG-ICL</th>
+            <th rowspan="2" class="sort-th" data-col="6" data-asc="false" onclick="sortAblation(6)">CSR (%) ↑ <span class="sort-icon">⇅</span></th>
+            <th rowspan="2" class="sort-th" data-col="7" data-asc="false" onclick="sortAblation(7)">RT (s) ↓ <span class="sort-icon">⇅</span></th>
+            <th rowspan="2" class="sort-th" data-col="8" data-asc="false" onclick="sortAblation(8)">Tokens ↓ <span class="sort-icon">⇅</span></th>
+            <th colspan="7" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);">Scenario Alignment ↑</th>
+          </tr>
+          <tr>
+            <th>CodeICL</th><th>DocICL</th>
+            <th class="sort-th" data-col="9"  data-asc="false" onclick="sortAblation(9)">RL <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="10" data-asc="false" onclick="sortAblation(10)">TI <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="11" data-asc="false" onclick="sortAblation(11)">TM <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="12" data-asc="false" onclick="sortAblation(12)">DO <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="13" data-asc="false" onclick="sortAblation(13)">EN <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="14" data-asc="false" onclick="sortAblation(14)">SQ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="15" data-asc="false" onclick="sortAblation(15)">FA <span class="sort-icon">⇅</span></th>
+          </tr>
+        </thead>
+        <tbody id="ablation-tbody"></tbody>
+      </table>
+    </div>
+    <p class="table-note">*C1 is zero-shot baseline (Gemini-3-Flash). CP: Contextual Prompting, CoT: Chain-of-Thought, ICL: In-Context Learning, RAG-ICL: Retrieval-Augmented ICL (Code/Doc). CSR: Compilation Success Rate, RT: Response Time, Tokens: token usage. Alignment layers — RL: Road, TI: Traffic Infrastructure, TM: Temporal Modifications, DO: Dynamic Objects, EN: Environment. SQ: Scenario Quality, FA: Framework Accuracy.</p>
+
+    <div class="prompt-grid" style="margin-top:28px;">
+      <div class="prompt-card">
+        <span class="tag">CP</span>
+        <h3>Contextual Prompting</h3>
+        <p>Enhances domain understanding by injecting domain-specific knowledge directly into the prompt, including syntax constraints, hierarchical type systems (e.g., NetworkElement → LinearElement → {Road, Lane}), and available operators.</p>
+      </div>
+      <div class="prompt-card">
+        <span class="tag">CoT</span>
+        <h3>Chain-of-Thought</h3>
+        <p>Structures the generation task into explicit reasoning steps tailored per component (e.g., Understand → Examine → Select → Define → Instantiate → Validate), enabling the model to complete each step incrementally.</p>
+      </div>
+      <div class="prompt-card">
+        <span class="tag">ICL</span>
+        <h3>In-Context Learning</h3>
+        <p>Employs contrastive few-shot examples where positive examples showcase correct syntax patterns while negative examples present error-correction pairs, anchoring the model to concrete instances and reducing ambiguity.</p>
+      </div>
+      <div class="prompt-card">
+        <span class="tag">RAG-ICL</span>
+        <h3>Retrieval-Augmented ICL</h3>
+        <p>Extends ICL with dynamic retrieval: <strong>CodeICL</strong> retrieves the top-3 semantically similar code snippets per query, while <strong>DocICL</strong> retrieves relevant documentation chunks, ensuring in-context examples are always tailored to the specific component being generated.</p>
+      </div>
+    </div>
+
+    <!-- Cross-model Comparison Table -->
+    <h3 style="margin-top:40px;">Comparison across Models &amp; SOTA Methods</h3>
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:8px;">Click any numeric column header to sort. ↑ = higher is better, ↓ = lower is better.</p>
+    <div class="table-wrap">
+      <table id="cross-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="sort-th" data-col="0" onclick="sortCross(0)">Model Variant <span class="sort-icon">⇅</span></th>
+            <th rowspan="2" class="sort-th" data-col="1" onclick="sortCross(1)">CSR (%) ↑ <span class="sort-icon">⇅</span></th>
+            <th rowspan="2" class="sort-th" data-col="2" onclick="sortCross(2)">RT (s) ↓ <span class="sort-icon">⇅</span></th>
+            <th rowspan="2" class="sort-th" data-col="3" onclick="sortCross(3)">Tokens ↓ <span class="sort-icon">⇅</span></th>
+            <th colspan="7" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);">Scenario Alignment ↑</th>
+          </tr>
+          <tr>
+            <th>RL</th><th>TI</th><th>TM</th><th>DO</th><th>EN</th><th>SQ</th>
+            <th class="sort-th" data-col="10" onclick="sortCross(10)">FA <span class="sort-icon">⇅</span></th>
+          </tr>
+        </thead>
+        <tbody id="cross-tbody"></tbody>
+      </table>
+    </div>
+    <p class="table-note">CSR: Compilation Success Rate, RT: Response Time. Alignment layers — RL: Road, TI: Traffic Infrastructure, TM: Temporal Modifications, DO: Dynamic Objects, EN: Environment. SQ: Scenario Quality, FA: Framework Accuracy (CSR × SQ).</p>
+  </div>
+</section>
+
+<!-- ══════════ BENCHMARK ══════════ -->
+<section id="benchmark">
+  <div class="container">
+    <h2>Benchmark</h2>
+    <p>We propose the first regulation-grounded benchmark for autonomous driving scenario generation from natural language, comprising <strong>123 scenario specifications</strong> drawn from real-world regulatory sources. Browse all scenarios by source below.</p>
+
+    <!-- Stats row -->
+    <div class="benchmark-stats">
+      <div class="bench-item"><div class="bval">123</div><div class="blabel">Total Scenarios</div></div>
+      <div class="bench-item"><div class="bval">24</div><div class="blabel">CARLA Leaderboard</div></div>
+      <div class="bench-item"><div class="bval">16</div><div class="blabel">NHTSA Crash</div></div>
+      <div class="bench-item"><div class="bval">31</div><div class="blabel">NHTSA PreCrash</div></div>
+      <div class="bench-item"><div class="bval">4</div><div class="blabel">UN R152</div></div>
+      <div class="bench-item"><div class="bval">12</div><div class="blabel">UN R157</div></div>
+      <div class="bench-item"><div class="bval">36</div><div class="blabel">UN R171</div></div>
+    </div>
+
+    <!-- Toggle button -->
+    <div style="text-align:center;margin:24px 0 8px;">
+      <button id="bench-toggle-btn" onclick="toggleBenchBrowser()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.18);color:inherit;padding:10px 28px;border-radius:8px;cursor:pointer;font-size:0.95rem;transition:background 0.2s;">
+        Browse Scenarios ▾
+      </button>
+    </div>
+
+    <!-- Collapsible browser -->
+    <div id="bench-browser" style="display:none;">
+      <!-- Search -->
+      <div class="bench-search-wrap">
+        <svg class="bench-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/></svg>
+        <input id="bench-search" class="bench-search" type="text" placeholder="Search scenarios…" oninput="filterScenarios()" />
+        <span id="bench-count" class="bench-count"></span>
+      </div>
+
+      <!-- Source tabs -->
+      <div class="bench-tabs" id="bench-tabs">
+        <button class="bench-tab active" data-src="all"     onclick="selectSource('all',this)">All <span class="btag">123</span></button>
+        <button class="bench-tab"        data-src="carla"   onclick="selectSource('carla',this)">CARLA Leaderboard <span class="btag">24</span></button>
+        <button class="bench-tab"        data-src="crash"   onclick="selectSource('crash',this)">NHTSA Crash <span class="btag">16</span></button>
+        <button class="bench-tab"        data-src="precrash"onclick="selectSource('precrash',this)">NHTSA PreCrash <span class="btag">31</span></button>
+        <button class="bench-tab"        data-src="r152"    onclick="selectSource('r152',this)">UN R152 <span class="btag">4</span></button>
+        <button class="bench-tab"        data-src="r157"    onclick="selectSource('r157',this)">UN R157 <span class="btag">12</span></button>
+        <button class="bench-tab"        data-src="r171"    onclick="selectSource('r171',this)">UN R171 <span class="btag">36</span></button>
+      </div>
+
+      <!-- Scenario cards -->
+      <div id="bench-grid" class="bench-grid"></div>
+      <div id="bench-empty" class="bench-empty" style="display:none;">No scenarios match your search.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ QUALITATIVE EXAMPLES ══════════ -->
+<section>
+  <div class="container">
+    <h2>Qualitative Examples</h2>
+    <p>Generated scenarios visualized in CARLA across three benchmark sources. Toggle between First-Person View (FPV) and Bird's-Eye View (BEV).</p>
+
+    <div class="gallery-tabs">
+      <button class="tab-btn active" onclick="switchView('fpv', this)">First-Person View (FPV)</button>
+      <button class="tab-btn" onclick="switchView('bev', this)">Bird's-Eye View (BEV)</button>
+    </div>
+
+    <div id="panel-fpv" class="view-panel active">
+      <div class="gallery-grid">
+        <img src="static/images/examples/fpv_1.png" alt="FPV Example 1" />
+        <img src="static/images/examples/fpv_2.png" alt="FPV Example 2" />
+        <img src="static/images/examples/fpv_3.png" alt="FPV Example 3" />
+        <img src="static/images/examples/fpv_4.png" alt="FPV Example 4" />
+      </div>
+    </div>
+
+    <div id="panel-bev" class="view-panel">
+      <div class="gallery-grid">
+        <img src="static/images/examples/bev_1.png" alt="BEV Example 1" />
+        <img src="static/images/examples/bev_2.png" alt="BEV Example 2" />
+        <img src="static/images/examples/bev_3.png" alt="BEV Example 3" />
+        <img src="static/images/examples/bev_4.png" alt="BEV Example 4" />
+      </div>
+    </div>
+
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:12px;">Scenarios sourced from CARLA Leaderboard, UN R171, and NHTSA Crash datasets. All rendered in CARLA 0.9.15.</p>
+  </div>
+</section>
+
+<!-- ══════════ BIBTEX ══════════ -->
+<section>
+  <div class="container">
+    <h2>BibTeX</h2>
+    <div style="position:relative;">
+      <div class="bibtex-box" id="bibtex-content">@inproceedings{chat2scenic2026,
+  title     = {Chat2Scenic: An Iterative RAG-Based Framework
+               for Automated Driving Scenario Generation},
+  author    = {Anonymous Authors},
+  booktitle = {Proceedings of the IEEE/RSJ International Conference
+               on Intelligent Robots and Systems (IROS)},
+  year      = {2026},
+  note      = {Under review}
+}</div>
+      <button class="copy-btn" onclick="copyBibtex()">Copy</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <p>Chat2Scenic &nbsp;·&nbsp; IROS 2026 Submission &nbsp;·&nbsp; Anonymous Review</p>
+  <p style="margin-top:8px;">
+    <a href="https://github.com/anonymous-research-paper/chat2scenic">GitHub</a>
+  </p>
+  <p style="margin-top:12px; font-size:0.78rem; color:rgba(255,255,255,0.3);">
+    Built with vanilla HTML/CSS for GitHub Pages hosting.
+  </p>
+</footer>
+
+<script>
+  function switchView(view, btn) {
+    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + view).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── BENCHMARK DATA ──
+  const SCENARIOS = [
+    // CARLA Leaderboard (24)
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle loses control due to bad conditions on the road and it must recover, coming back to its original lane."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle is performing an unprotected left turn at an intersection, yielding to oncoming traffic. This scenario occurs at both signalized and non-signalized junctions."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle is performing a right turn at an intersection, yielding to crossing traffic. This scenario occurs at both signalized and non-signalized junctions."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle needs to negotiate with other vehicles to cross an unsignalized intersection. In this situation it is assumed that the first to enter the intersection has priority."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle is going straight at an intersection but a crossing vehicle runs a red light, forcing the ego-vehicle to avoid the collision."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle needs to perform a turn at an intersection yielding to bicycles crossing from either the left or right."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle merges into moving highway traffic from a highway on-ramp."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters a vehicle merging into its lane from a highway on-ramp. The ego-vehicle must decelerate, brake or change lane to avoid a collision."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters a vehicle cutting into its lane from a lane of static traffic. The ego-vehicle must decelerate, brake or change lane to avoid a collision."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle must cross a lane of moving traffic to exit the highway at an off-ramp."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle is approached by an emergency vehicle coming from behind. The ego-vehicle must maneuver to allow the emergency vehicle to pass."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters an obstacle blocking the lane and must perform a lane change into traffic moving in the same direction to avoid it."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters an obstacle blocking the lane and must perform a lane change into traffic moving in the opposite direction to avoid it."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters a parked vehicle opening a door into its lane and must maneuver to avoid it."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters a slow moving hazard blocking part of the lane. The ego-vehicle must brake or maneuver next to a lane of traffic moving in the same direction to avoid it."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters a slow moving hazard blocking part of the lane. The ego-vehicle must brake or maneuver to avoid it next to a lane of traffic moving in the opposite direction."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters an oncoming vehicles invading its lane on a bend due to an obstacle. It must brake or maneuver to the side of the road to navigate past the oncoming traffic."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The leading vehicle decelerates suddenly due to an obstacle and the ego-vehicle must perform an emergency brake or an avoidance maneuver."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters an obstacle / unexpected entity on the road and must perform an emergency brake or an avoidance maneuver."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle encounters a pedestrian emerging from behind a parked vehicle and advancing into the lane. The ego-vehicle must brake or maneuver to avoid it."},
+    {src:'carla', label:'CARLA Leaderboard', text:"While performing a maneuver, the ego-vehicle encounters an obstacle in the road, either a pedestrian or a bicycle, and must perform an emergency brake or an avoidance maneuver."},
+    {src:'carla', label:'CARLA Leaderboard', text:"While performing a maneuver, the ego-vehicle encounters a stopped vehicle in the road and must perform an emergency brake or an avoidance maneuver."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle must slow down or brake to allow a parked vehicle exiting a parallel parking bay to cut in front."},
+    {src:'carla', label:'CARLA Leaderboard', text:"The ego-vehicle must exit a parallel parking bay into a flow of traffic."},
+    // NHTSA Crash (16)
+    {src:'crash', label:'NHTSA Crash', text:"A pedestrian crossing a multi-lane roadway was struck by vehicle. The driver was looking for other vehicles and traffic controls, but did not see the pedestrian."},
+    {src:'crash', label:'NHTSA Crash', text:"Driver ran the red light. The driver saw the light turn yellow but decided to continue through the intersection."},
+    {src:'crash', label:'NHTSA Crash', text:"The driver was alert and driving along a surface street. Suddenly something appeared in the driver's path (e.g., pedestrian)."},
+    {src:'crash', label:'NHTSA Crash', text:"Vehicle A, in an attempt to turn left, cut the corner too sharply and clipped Vehicle B waiting at the intersection. Vehicle A began the turn too early and misjudged the distance between cars."},
+    {src:'crash', label:'NHTSA Crash', text:"Vehicle A, in an attempt to turn left, cut the corner too sharply and clipped Vehicle B waiting at the intersection."},
+    {src:'crash', label:'NHTSA Crash', text:"Vehicle B was following Vehicle A too closely. Vehicle A had to stop quickly; B could not stop in time and rear-ended A."},
+    {src:'crash', label:'NHTSA Crash', text:"A northbound vehicle, A, was stopped waiting at a red traffic signal. Another vehicle, B, coming from behind, didn't notice that A was stopped and could not stop in time."},
+    {src:'crash', label:'NHTSA Crash', text:"A stopped vehicle, A, was looking left and right waiting for traffic to clear. Driver B, who had been watching traffic, thought that A had moved on and proceeded, rear-ending driver A."},
+    {src:'crash', label:'NHTSA Crash', text:"Vehicle A was braking for stopped traffic. Driver B saw the brake lights but when B braked the road was very slick. B did not stop and struck A in the rear."},
+    {src:'crash', label:'NHTSA Crash', text:"Vehicle A, in an attempt to pass vehicle B, cut around B too closely. Driver A misjudged the distance between cars and clipped the corner of B."},
+    {src:'crash', label:'NHTSA Crash', text:"Driver of Vehicle A looked for traffic before changing lanes to the right. The driver did not see Vehicle B in the curb lane. Vehicle B braked and steered to avoid Vehicle A."},
+    {src:'crash', label:'NHTSA Crash', text:"Driver of Vehicle A looked for traffic before changing lanes to the left. The driver did not see Vehicle B in the next lane. Vehicle B had no time to react and nowhere to go."},
+    {src:'crash', label:'NHTSA Crash', text:"Vehicle A saw Vehicle B approaching in the next lane and determined that B was far enough back. Driver A misjudged the distance and speed of Vehicle B, which struck A from behind."},
+    {src:'crash', label:'NHTSA Crash', text:"Vehicle B attempted to turn from the curb lane across the path of Vehicle A onto a side street. Driver A struck illegally turning B in the driver's side."},
+    {src:'crash', label:'NHTSA Crash', text:"A northbound vehicle, A, was waiting to make a left turn. A southbound driver, B, accelerated hard hoping to make the light and struck Vehicle A."},
+    {src:'crash', label:'NHTSA Crash', text:"Vehicle A was waiting to turn left. Driver A observed B approaching from the opposite direction but thought there was enough time to complete the left turn. Driver A misjudged vehicle B's distance and was struck by Vehicle B."},
+    // NHTSA PreCrash (31)
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning left or right at an intersection-related area, in daylight, under clear weather conditions, with a posted speed limit of 45 mph or less, then loses control due to wet or slippery roads and runs off the road."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in a rural area, in daylight, under adverse weather conditions, with a posted speed limit of 55 mph or more, and then loses control due to wet or slippery roads and runs off the road."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in an urban area, in daylight, under clear weather conditions, with a posted speed limit of 35 mph; vehicle then runs a red light, crossing an intersection and colliding with another vehicle crossing from a lateral direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in a rural area, in daylight, under clear weather conditions, with a posted speed limit of 35 mph or less; and runs a stop sign at an intersection."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning left/right at an intersection-related location, in a rural area at night, under clear weather conditions, with a posted speed limit of 25 mph; and then departs the edge of the road."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in a rural area at night, under clear weather conditions, with a posted speed limit of 55 mph or more, and departs the edge of the road at a non-junction area."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is backing up in an urban area, in daylight, under clear weather conditions, with a posted speed limit of 25 mph; and then departs the road edge on the shoulder/parking lane in a driveway/alley location."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning left in an urban area, in daylight, under clear weather conditions with a posted speed limit of 35 mph; and encounters a pedestrian in the crosswalk at a signaled intersection."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in an urban area, in daylight, under clear weather conditions, with a posted speed limit of 25 mph; and then encounters a pedestrian at a non-junction location."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning right in an urban area, in daylight, under clear weather conditions, with a posted speed limit of 25 mph; and encounters a pedalcyclist at an intersection."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in an urban area, in daylight, under clear weather conditions, with a posted speed limit of 25 mph; and encounters a pedalcyclist at an intersection."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is backing up in an urban area, in daylight, under clear weather conditions, at a driveway or alley location, with a posted speed limit of 25 mph; and collides with another vehicle."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning left at an intersection in an urban area, in daylight, under clear weather conditions, with a posted speed limit of 35 mph; and then cuts across the path of another vehicle initially traveling in the same direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is changing lanes in an urban area, in daylight, under clear weather conditions, at a non-junction with a posted speed limit of 55 mph or more; and then encroaches into another vehicle traveling in the same direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in an urban area, in daylight, under clear weather conditions, at a non-junction with a posted speed limit of 55 mph or more; and then drifts into an adjacent vehicle traveling in the same direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is passing another vehicle in a rural area, in daylight, under clear weather conditions, at a non-junction with a posted speed limit of 55 mph or more; and encroaches into another vehicle traveling in the opposite direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in a rural area, in daylight, under clear weather conditions, at a non-junction with a posted speed limit of 55 mph or more; and drifts and encroaches into another vehicle traveling in the opposite direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is changing lanes or passing in an urban area, in daylight, under clear weather conditions, at a non-junction with a posted speed limit of 55 mph; and closes in on a lead vehicle."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in an urban area, in daylight, under clear weather conditions, at an intersection-related location with a posted speed limit of 45 mph; and closes in on an accelerating lead vehicle."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in an urban area, in daylight, under clear weather conditions, at a non-junction with a posted speed limit of 55 mph or more; and closes in on a lead vehicle moving at lower constant speed."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight and following another lead vehicle in a rural area, in daylight, under clear weather conditions, at a non-junction with a posted speed limit of 55 mph or more; and the lead vehicle suddenly decelerates."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in an urban area, in daylight, under clear weather conditions, at an intersection-related location with a posted speed limit of 35 mph; and closes in on a stopped lead vehicle."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning left in an urban area, in daylight, under clear weather conditions, at a signalized intersection with a posted speed limit of 35 mph; and cuts across the path of another vehicle straight crossing from an opposite direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning right in an urban area, in daylight, under clear weather conditions, at a signalized intersection with a posted speed limit of 35 mph; and turns into the same direction of another vehicle crossing straight initially from a lateral direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning left, in daylight, under clear weather conditions, at an intersection without traffic controls, with a posted speed limit of 35 mph; and then cuts across the path of another vehicle traveling from the opposite direction."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle stops at a stop sign in an urban area, in daylight, under clear weather conditions, at an intersection with a posted speed limit of 25 mph; and then proceeds against lateral crossing traffic."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle stops at a stop sign in a rural area, in daylight, under clear weather conditions, at an intersection with a posted speed limit of 35 mph; and proceeds to turn left against lateral crossing traffic."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is turning left at an intersection-related location, in an urban area, in daylight, under clear weather conditions, with a posted speed limit of 35 mph; and takes an evasive action to avoid an obstacle."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in an urban area, in daylight, under clear weather conditions, at a non-junction location with a posted speed limit of 35 mph; and takes an evasive action to avoid an obstacle."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is leaving a parked position at night, in an urban area, under clear weather conditions, at a non-junction location with a posted speed limit of 25 mph; and collides with an object on road shoulder or parking lane."},
+    {src:'precrash', label:'NHTSA PreCrash', text:"Vehicle is going straight in a rural area at night, under clear weather conditions, at a non-junction location with a posted speed limit of 55 mph or more; and collides with an object on the road."},
+    // UN R152 (4)
+    {src:'r152', label:'UN R152', text:"The subject vehicle passes by a left turn or right turn in front of an oncoming vehicle that is stopped to make a left turn or right turn at an intersection."},
+    {src:'r152', label:'UN R152', text:"The subject vehicle follows a forward vehicle. After that, the forward vehicle turns right or left at a corner, and the subject vehicle goes straight."},
+    {src:'r152', label:'UN R152', text:"The subject vehicle drives a small radius curved road of which the guard pipes are constructed to the outer side, and a stationary vehicle (M1 category), a stationary pedestrian target or a stationary bicycle target is positioned just outside of the guard pipes and where on the extension of the centre of the lane."},
+    {src:'r152', label:'UN R152', text:"The subject vehicle changes the lane in front of the signboard which is positioned in the centre of the lane and notifies the driver that the lane is reduced."},
+    // UN R157 (12)
+    {src:'r157', label:'UN R157', text:"The other vehicle suddenly merges in front of the ego vehicle."},
+    {src:'r157', label:'UN R157', text:"The other vehicle suddenly exits the lane of the ego vehicle."},
+    {src:'r157', label:'UN R157', text:"The other vehicle suddenly decelerates in front of the ego vehicle."},
+    {src:'r157', label:'UN R157', text:"The vehicle must maintain a stable position and remain within its ego lane across various speeds and curvatures while navigating scenarios where an adjacent vehicle drives close beside it and a leading passenger car or motorcycle swerves within the lane for a while."},
+    {src:'r157', label:'UN R157', text:"The ego vehicle encounters a stationary powered two-wheeler positioned directly in the center of the lane when navigating a highway curve, then should detect the object despite the lateral offset and execute an emergency braking maneuver."},
+    {src:'r157', label:'UN R157', text:"The ego vehicle is traveling in a straight lane when a pedestrian target emerges from the roadside and begins crossing the lane at a constant speed of 5 km/h, forcing the system to calculate a predicted path and decelerate sufficiently to prevent contact."},
+    {src:'r157', label:'UN R157', text:"The ego vehicle approaches a section of the road where a motorcycle and a passenger car are stopped sequentially within the same lane; the ego should maintain a safe stop."},
+    {src:'r157', label:'UN R157', text:"The ego travels on a straight highway section behind a passenger car that suddenly performs a high-intensity emergency braking maneuver until it reaches a complete stop. The ego vehicle should maintain a safe distance and avoid a collision."},
+    {src:'r157', label:'UN R157', text:"The ego vehicle follows a lead vehicle at a constant speed until the lead vehicle performs a sudden lateral evasive maneuver, abruptly revealing a stationary passenger car centered in the original path, requiring emergency braking."},
+    {src:'r157', label:'UN R157', text:"The ego vehicle travels at a constant speed while a passenger car or motorcycle in the adjacent lane executes a cut-in maneuver with varying lateral velocities and longitudinal accelerations, forcing the ego vehicle to avoid the collision through braking or deceleration."},
+    {src:'r157', label:'UN R157', text:"The ego vehicle follows a lead vehicle at a constant speed until the lead vehicle suddenly performs an evasive swerve to an adjacent lane, revealing a stationary passenger car target directly in the ego vehicle's path; the ego vehicle should detect the obstacle and brake to a full stop."},
+    {src:'r157', label:'UN R157', text:"The ego vehicle follows a lead vehicle until the lead vehicle performs a sudden evasive maneuver, revealing a slow-moving target motorcycle traveling at a significantly lower speed in the same path. The ego vehicle should detect the speed differential and decelerate to maintain a safe distance."},
+    // UN R171 (36)
+    {src:'r171', label:'UN R171', text:"The ego vehicle follows a lead vehicle traveling at least 20 km/h slower on a straight highway for over two seconds with a centerline offset under 1 meter, then the driver initiates a lane change command causing the ego vehicle to perform a full 3.5-meter lateral displacement into the adjacent lane to overtake the slower vehicle."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels on a non-physically separated road shared with pedestrians and cyclists and initiates a lane change to overtake a slower lead vehicle, but because an oncoming vehicle or nearby cyclist creates an unsafe boundary condition, the ego delays the execution of the maneuver until a safe gap is detected."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle initiates a driver-requested lane change on a multi-lane road, but must detect and yield to a high-speed vehicle approaching from the rear in the target lane, delaying the maneuver until the overtaking vehicle has safely passed."},
+    {src:'r171', label:'UN R171', text:"While traveling on a straight section, the ego vehicle wants to perform a lane change to overtake a lead vehicle but remains in its current lane because it detects a motorcycle filtering or approaching rapidly from behind in the adjacent lane."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle attempts to initiate a lane change while a parallel passenger car maintains a steady position directly in the blind spot or adjacent zone, requiring the ego vehicle to wait for the adjacent vehicle to either accelerate or fall back before executing the lateral shift."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle begins a lane change into a center lane at the same time a vehicle from the furthest lane starts merging into that same target space, forcing the ego vehicle to detect the potential collision risk and either abort the maneuver or adjust its path."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle follows a lead vehicle in a straight lane for over two seconds with a lateral offset of less than one meter, then successfully completes a full lane change maneuver involving a 3.5-meter lateral displacement into the adjacent lane."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels at a constant speed in a straight line for at least two seconds with a lateral offset of less than 0.5 meters before approaching a stationary vehicle positioned directly ahead in the same lane."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels along a straight, fully marked lane at a constant speed to establish stable lateral control before entering a curve where it must detect and react to a stationary target vehicle positioned with a 0.5-meter offset from the lane center."},
+    {src:'r171', label:'UN R171', text:"While operating in a non-highway environment, the ego vehicle rounds a curve to find a stationary vehicle facing toward the VUT (oncoming orientation) in its lane; the ego should identify the front of the vehicle as a collision hazard and respond accordingly."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle navigates a curved road section where it must detect a stationary vehicle positioned with a 1.0-meter lateral offset from the lane centerline."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle stabilizes its lateral position on a straight section before entering a curve where it encounters a stationary heavy truck (different category) positioned within the lane; the ego should identify the larger vehicle type and initiate braking."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels in a straight line for at least two seconds before encountering a slower moving vehicle target directly ahead in the same lane with an offset of less than 0.5 meters while maintaining a constant speed difference of 50 km/h between the two vehicles."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels along a straight road at a constant speed and approaches a slower moving heavy truck or motorcycle from behind that is traveling at a speed exactly 50 km/h less than the ego vehicle."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle maintains its straight path while approaching a slower moving vehicle target ahead that is intentionally positioned with a significant lateral offset from the ego's centerline, exceeding the standard 0.5-meter threshold while remaining within the lane."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle navigates a straight section of the road and encounters a much slower vehicle target ahead where the speed differential between the two vehicles is significantly increased beyond 50 km/h to test the system's high-speed closing response."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle follows a lead M1 category vehicle when the lead vehicle suddenly performs a 3.5-meter lane change at a TTC of less than 3 seconds to reveal a stationary target vehicle of a different category directly in the ego vehicle's path."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle follows a lead car that suddenly swerves into the adjacent lane to avoid a stationary motorcycle or heavy truck positioned in the center of the lane."},
+    {src:'r171', label:'UN R171', text:"The lead vehicle performs an emergency lane change to avoid a stopped car when its own TTC with that car is only 1.5 seconds, creating a high-urgency 'late reveal' situation for the ego vehicle following behind."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle and the lead vehicle travel at a high highway speed of 100 km/h in a synchronized flow until the lead vehicle suddenly exits the lane to reveal a stationary target."},
+    {src:'r171', label:'UN R171', text:"The lead vehicle executes a highly aggressive, high-lateral-acceleration lane change to simulate a panic swerve, testing whether the ego vehicle's sensors can maintain a stable track on the revealed stationary object despite the rapid visual occlusion change."},
+    {src:'r171', label:'UN R171', text:"A target vehicle in an adjacent lane performs a full lateral displacement of 3.5 meters to merge into the path of the ego vehicle with a lateral deviation of no more than 0.2 meters."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle is cruising at a constant speed when a large heavy-duty truck in the adjacent lane suddenly executes a full lane change into the ego lane."},
+    {src:'r171', label:'UN R171', text:"While the ego vehicle is traveling on a straight highway, a lead vehicle from the left lane merges abruptly into the ego lane with a very short Time-to-Collision (TTC)."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels at 100 km/h while a slower-moving target vehicle in the adjacent lane at 60 km/h performs a lane change into the ego vehicle's path, forcing the ego vehicle to rapidly bridge the speed differential to avoid a rear-end collision."},
+    {src:'r171', label:'UN R171', text:"A target vehicle performs a highly aggressive, high-lateral-acceleration 'swerve' maneuver to change lanes into the ego vehicle's path; the ego should respond by either braking or steering to avoid a collision."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels in a straight line for at least two seconds before encountering a stationary adult pedestrian target positioned directly in its driving path and facing away from the vehicle, requiring an autonomous braking maneuver to avoid a collision."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle maintains its trajectory in a straight lane while a stationary pedestrian is positioned near the lane marking but outside the vehicle's direct driving path; the ego vehicle should detect the target and execute an autonomous braking maneuver."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle approaches the stationary pedestrian at a high test velocity, requiring the ego vehicle to detect the target and execute an autonomous braking maneuver to avoid a collision."},
+    {src:'r171', label:'UN R171', text:"The VUT travels in a straight line for at least two seconds before encountering a stationary bicycle target positioned directly in its driving path and facing away, requiring either an emergency braking maneuver or a controlled lateral bypass."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels at a constant speed while a pedestrian target emerges from the side and crosses perpendicular to the vehicle's path at a steady 5 km/h, requiring the ego vehicle to detect the pedestrian at least 4 seconds before impact and execute an autonomous braking response."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels along a straight path while a bicycle target, initially obstructed during its acceleration phase, emerges and crosses perpendicularly at a constant speed of 15 km/h; the ego vehicle should detect the bicycle target and execute an autonomous braking maneuver."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle travels at a constant test speed through an intersection while a pedestrian target begins crossing from the near side at 5 km/h on a trajectory timed to impact the VUT's longitudinal centerline, requiring detection at least 4 seconds before the predicted collision."},
+    {src:'r171', label:'UN R171', text:"While the ego vehicle travels at its prescribed test speed through an intersection, a bicycle target emerges from an obstructed area and crosses perpendicular to the ego vehicle's path at a constant speed of 15 km/h, timed precisely so that its centerline aligns with the ego vehicle's impact point."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle approaches an intersection in a straight line and initiates a turn across the path of an oncoming passenger car or motorcycle traveling at up to 60 km/h, requiring the system to detect the oncoming threat and intervene to prevent a collision."},
+    {src:'r171', label:'UN R171', text:"The ego vehicle approaches an intersection in a straight line while a vehicle target enters from the side at a speed of up to 60 km/h, requiring the ego vehicle to recognize the crossing vehicle and decelerate or stop to provide the right of way and avoid colliding with the target's side."},
+  ];
+
+  let currentSrc = 'all';
+
+  function selectSource(src, btn) {
+    currentSrc = src;
+    document.querySelectorAll('.bench-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderScenarios();
+  }
+
+  function filterScenarios() { renderScenarios(); }
+
+  function renderScenarios() {
+    const q = (document.getElementById('bench-search').value || '').toLowerCase();
+    const filtered = SCENARIOS.filter(s =>
+      (currentSrc === 'all' || s.src === currentSrc) &&
+      (!q || s.text.toLowerCase().includes(q) || s.label.toLowerCase().includes(q))
+    );
+    const grid = document.getElementById('bench-grid');
+    const empty = document.getElementById('bench-empty');
+    const countEl = document.getElementById('bench-count');
+
+    countEl.textContent = q ? `${filtered.length} result${filtered.length !== 1 ? 's' : ''}` : '';
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    let srcCounter = {};
+    grid.innerHTML = filtered.map((s, i) => {
+      srcCounter[s.src] = (srcCounter[s.src] || 0) + 1;
+      const globalIdx = SCENARIOS.indexOf(s) + 1;
+      return `<div class="bench-card" onclick="this.classList.toggle('expanded')">
+        <div class="bench-card-header">
+          <span class="bench-card-num">#${globalIdx}</span>
+          <span class="bench-card-src src-${s.src}">${s.label}</span>
+        </div>
+        <div class="bench-card-text">${s.text}</div>
+        <div class="bench-card-toggle">Click to expand ↕</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Init on load
+  document.addEventListener('DOMContentLoaded', renderScenarios);
+
+  function copyBibtex() {
+    const text = document.getElementById('bibtex-content').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  /* ── Sortable Ablation Table ── */
+  // col indices: 0=ID(num),1=CP,2=CoT,3=ICL,4=CodeICL,5=DocICL,
+  //              6=CSR,7=RT,8=Tokens,9=RL,10=TI,11=TM,12=DO,13=EN,14=SQ,15=FA
+  // "lower is better" columns: 7=RT, 8=Tokens
+  const LOWER_BETTER = new Set([7, 8]);
+
+  const ABLATION_ROWS = [
+    // [id, cp, cot, icl, codeicl, docicl, csr,   rt,     tokens, rl,    ti,    tm,    do_,   en,    sq,    fa,    tier]
+    ['C1*', '—','—','—','—','—',  0.00, 170.63, 32572, 0.00, 0.00,  null,  0.00,  0.00,  0.00,  0.00, 'Zero / Few-shot Tier'],
+    ['C2',  '—','—','✓','—','—',  4.06, 102.58, 22889, 100.00,100.00,null, 66.67,100.00, 88.89,  3.61, 'Zero / Few-shot Tier'],
+    ['C3',  '—','—','—','✓','—',  8.10, 157.75, 27796, 64.58, 75.00,100.00,41.67, 75.00, 54.86,  4.44, 'Zero / Few-shot Tier'],
+    ['C4',  '✓','—','—','—','—', 12.20, 435.59, 43657, 82.29,100.00,100.00,52.08,100.00, 69.79,  8.51, 'Contextual Tier'],
+    ['C5',  '✓','—','✓','—','—', 47.15, 196.60, 39702, 88.10, 83.33, 76.67,43.12,100.00, 69.18, 32.62, 'Contextual Tier'],
+    ['C6',  '✓','—','—','✓','—', 58.54, 318.92, 47085, 84.43, 90.00, 75.00,45.61, 97.62, 69.17, 40.49, 'Contextual Tier'],
+    ['C7',  '✓','—','✓','✓','—', 60.10, 172.27, 48606, 88.22, 78.57, 85.00,54.89, 98.00, 74.93, 45.03, 'Contextual Tier'],
+    ['C8',  '✓','✓','—','—','—', 13.01, 624.12, 55153, 84.31,100.00,  null,41.18,100.00, 65.52,  8.52, 'Thinking Tier'],
+    ['C9',  '✓','✓','✓','—','—', 54.47, 520.47, 52689, 87.81, 92.31,100.00,49.50, 97.22, 71.77, 39.09, 'Thinking Tier'],
+    ['C10', '✓','✓','—','✓','—', 60.98, 300.47, 46005, 84.46, 77.78, 83.33,51.58,100.00, 70.70, 43.11, 'Thinking Tier'],
+    ['C11', '✓','✓','✓','✓','—', 76.42, 222.11, 52339, 90.65, 75.00, 83.33,58.16, 96.00, 76.12, 58.17, 'Thinking Tier'],
+    ['C12', '✓','✓','✓','✓','✓', 56.90, 563.36, 70225, 86.62, 78.57, 75.00,54.93,100.00, 73.30, 41.71, 'Extended Configuration'],
+  ];
+
+  let ablationSortCol = null;
+  let ablationSortAsc = false;
+
+  function sortAblation(col) {
+    if (ablationSortCol === col) {
+      ablationSortAsc = !ablationSortAsc;
+    } else {
+      ablationSortAsc = LOWER_BETTER.has(col) ? true : false; // lower-better: asc first; higher-better: desc first
+      ablationSortCol = col;
+    }
+    renderAblation();
+    // update header highlights
+    document.querySelectorAll('#ablation-table .sort-th').forEach(th => {
+      th.classList.remove('sort-active');
+      th.querySelector('.sort-icon').textContent = '⇅';
+    });
+    const activeTh = document.querySelector(`#ablation-table .sort-th[data-col="${col}"]`);
+    if (activeTh) {
+      activeTh.classList.add('sort-active');
+      activeTh.querySelector('.sort-icon').textContent = ablationSortAsc ? '▲' : '▼';
+    }
+  }
+
+  function numVal(row, col) {
+    const v = row[col];
+    return (v === null || v === '—' || v === '✓') ? NaN : parseFloat(v);
+  }
+
+  function renderAblation() {
+    const tbody = document.getElementById('ablation-tbody');
+    let rows = [...ABLATION_ROWS];
+
+    // Compute per-column best values for highlighting (aggregate metrics + FA)
+    const numCols = [6,7,8,15];
+    const best = {};
+    numCols.forEach(c => {
+      const vals = rows.map(r => numVal(r, c)).filter(v => !isNaN(v));
+      if (vals.length) best[c] = LOWER_BETTER.has(c) ? Math.min(...vals) : Math.max(...vals);
+    });
+
+    // Sort
+    if (ablationSortCol !== null) {
+      rows.sort((a, b) => {
+        const av = ablationSortCol === 0 ? parseInt(a[0].replace(/\D/g,'')) : numVal(a, ablationSortCol);
+        const bv = ablationSortCol === 0 ? parseInt(b[0].replace(/\D/g,'')) : numVal(b, ablationSortCol);
+        if (isNaN(av) && isNaN(bv)) return 0;
+        if (isNaN(av)) return 1;
+        if (isNaN(bv)) return -1;
+        return ablationSortAsc ? av - bv : bv - av;
+      });
+    }
+
+    // Compute rank for sorted numeric col (shown as badge)
+    const rankMap = {};
+    if (ablationSortCol !== null && ablationSortCol !== 0) {
+      const sorted = [...rows].filter(r => !isNaN(numVal(r, ablationSortCol)));
+      sorted.sort((a,b) => {
+        const av = numVal(a, ablationSortCol), bv = numVal(b, ablationSortCol);
+        return LOWER_BETTER.has(ablationSortCol) ? av - bv : bv - av;
+      });
+      sorted.forEach((r, i) => { rankMap[r[0]] = i + 1; });
+    }
+
+    // Group by tier only when no sort active (original order)
+    const showTiers = ablationSortCol === null || ablationSortCol === 0;
+
+    let html = '';
+    let lastTier = null;
+    rows.forEach(row => {
+      const [id, cp, cot, icl, code, doc, csr, rt, tokens, rl, ti, tm, do_, en, sq, fa, tier] = row;
+      if (showTiers && tier !== lastTier) {
+        html += `<tr class="tier-row"><td colspan="16"><em>${tier}</em></td></tr>`;
+        lastTier = tier;
+      }
+      const isBest = id === 'C11';
+      const rank = rankMap[id];
+      const rankBadge = rank ? `<span class="cell-rank">#${rank}</span>` : '';
+      const fmt = (v, col) => {
+        if (v === null) return '—';
+        if (typeof v === 'string') return v;
+        const isBestVal = best[col] !== undefined && Math.abs(v - best[col]) < 0.001;
+        const val = v.toFixed(col === 8 ? 0 : 2);
+        if (isBestVal) return `<span class="cell-best">${val}</span>`;
+        return val;
+      };
+      const activeCol = ablationSortCol;
+      const highlight = (col) => col === activeCol ? 'background:rgba(99,179,237,0.08);' : '';
+      html += `<tr${isBest && showTiers ? ' class="best"' : ''}>
+        <td>${id}${rankBadge}</td>
+        <td>${cp}</td><td>${cot}</td><td>${icl}</td><td>${code}</td><td>${doc}</td>
+        <td style="${highlight(6)}">${fmt(csr,6)}</td>
+        <td style="${highlight(7)}">${fmt(rt,7)}</td>
+        <td style="${highlight(8)}">${fmt(tokens,8)}</td>
+        <td style="${highlight(9)}">${fmt(rl,9)}</td>
+        <td style="${highlight(10)}">${fmt(ti,10)}</td>
+        <td style="${highlight(11)}">${fmt(tm,11)}</td>
+        <td style="${highlight(12)}">${fmt(do_,12)}</td>
+        <td style="${highlight(13)}">${fmt(en,13)}</td>
+        <td style="${highlight(14)}">${fmt(sq,14)}</td>
+        <td style="${highlight(15)}">${fmt(fa,15)}</td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+  }
+
+  renderAblation();
+
+  /* ── Sortable Cross-Model Table ── */
+  // col indices: 0=name, 1=CSR, 2=RT, 3=Tokens, 4=RL, 5=TI, 6=TM, 7=DO, 8=EN, 9=SQ, 10=FA
+  const CROSS_LOWER_BETTER = new Set([2, 3]);
+  const CROSS_HIGHLIGHT_COLS = new Set([1, 2, 3, 10]);
+
+  const CROSS_ROWS = [
+    // [name, csr, rt, tokens, rl, ti, tm, do_, en, sq, fa, tier, isBest, isSota]
+    ['Qwen3-Coder:30B',              0.00,  62.95, 21098,  0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,  'Open-Source Models',  false, false],
+    ['Qwen3:30B',                    0.00, 135.23, 30659,  0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,  'Open-Source Models',  false, false],
+    ['Gemma3:27B',                   0.00, 121.88, 35705,  0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,  'Open-Source Models',  false, false],
+    ['GPT-OSS:20B',                  0.82,  96.69, 33199, 100.00, 100.00,  null, 100.00,   null, 100.00,   0.82,  'Open-Source Models',  false, false],
+    ['Mistral-Small3.2:24B',         1.62, 125.74, 32129, 100.00,  33.33,  null,  11.11, 100.00,  58.33,   0.94,  'Open-Source Models',  false, false],
+    ['Qwen-Flash',                   1.63,  15.00, 22081,  83.33, 100.00,  null,  22.22,   null,  62.04,   1.01,  'Proprietary Models',  false, false],
+    ['Qwen-Plus',                    5.70,  14.05, 21937, 100.00, 100.00,  null,  66.67, 100.00,  87.30,   4.98,  'Proprietary Models',  false, false],
+    ['Qwen3-Coder-Plus',            10.57,  19.67, 22072,  85.71,  80.00,  null,  34.52,  91.67,  65.28,   6.90,  'Proprietary Models',  false, false],
+    ['Qwen3-Coder-Flash',           15.44,  13.85, 21980,  97.37,  60.00, 33.33,  39.47, 100.00,  70.61,  10.90,  'Proprietary Models',  false, false],
+    ['DeepSeek-V3.2 (Chat)',        12.20,  28.04, 22676,  85.09,  70.00,  0.00,  45.61, 100.00,  72.37,   8.83,  'Proprietary Models',  false, false],
+    ['DeepSeek-V3.2 (Reasoner)',    14.63, 460.62, 35290,  93.75,  60.00,100.00,  56.25, 100.00,  78.30,  11.46,  'Proprietary Models',  false, false],
+    ['Gemini-3-Pro',                60.16, 165.39, 47928,  92.22,  61.54, 85.71,  53.33, 100.00,  73.50,  44.22,  'Proprietary Models',  false, false],
+    ['Gemini-3-Flash (Chat2Scenic)',76.42, 222.11, 52339,  90.65,  75.00, 83.33,  58.16,  96.00,  76.12,  58.17,  'Proprietary Models',  true,  false],
+    ['ChatScene (Retrieval Assemble)',30.08, 10.02,  4476,  65.03,  37.88,  0.00,   7.52,  46.67,  36.68,  11.03,  'SOTA Baselines (Gemini-3-Flash)', false, true],
+    ['NL2Scenic (Retrieval Generation)',16.26,43.44,20444, 96.15, 100.00, 66.67,  33.33, 100.00,  66.77,  10.86,  'SOTA Baselines (Gemini-3-Flash)', false, true],
+  ];
+
+  let crossSortCol = null;
+  let crossSortAsc = false;
+
+  function sortCross(col) {
+    if (crossSortCol === col) {
+      crossSortAsc = !crossSortAsc;
+    } else {
+      crossSortAsc = CROSS_LOWER_BETTER.has(col) ? true : false;
+      crossSortCol = col;
+    }
+    renderCross();
+    document.querySelectorAll('#cross-table .sort-th').forEach(th => {
+      th.classList.remove('sort-active');
+      th.querySelector('.sort-icon').textContent = '⇅';
+    });
+    const activeTh = document.querySelector(`#cross-table .sort-th[data-col="${col}"]`);
+    if (activeTh) {
+      activeTh.classList.add('sort-active');
+      activeTh.querySelector('.sort-icon').textContent = crossSortAsc ? '▲' : '▼';
+    }
+  }
+
+  function crossNumVal(row, col) {
+    const v = row[col];
+    return (v === null || v === '—') ? NaN : parseFloat(v);
+  }
+
+  function renderCross() {
+    const tbody = document.getElementById('cross-tbody');
+    let rows = [...CROSS_ROWS];
+
+    const best = {};
+    CROSS_HIGHLIGHT_COLS.forEach(c => {
+      const vals = rows.map(r => crossNumVal(r, c)).filter(v => !isNaN(v));
+      if (vals.length) best[c] = CROSS_LOWER_BETTER.has(c) ? Math.min(...vals) : Math.max(...vals);
+    });
+
+    if (crossSortCol !== null && crossSortCol !== 0) {
+      rows.sort((a, b) => {
+        const av = crossNumVal(a, crossSortCol);
+        const bv = crossNumVal(b, crossSortCol);
+        if (isNaN(av) && isNaN(bv)) return 0;
+        if (isNaN(av)) return 1;
+        if (isNaN(bv)) return -1;
+        return crossSortAsc ? av - bv : bv - av;
+      });
+    }
+
+    const rankMap = {};
+    if (crossSortCol !== null && crossSortCol !== 0) {
+      const sorted = [...rows].filter(r => !isNaN(crossNumVal(r, crossSortCol)));
+      sorted.sort((a, b) => {
+        const av = crossNumVal(a, crossSortCol), bv = crossNumVal(b, crossSortCol);
+        return CROSS_LOWER_BETTER.has(crossSortCol) ? av - bv : bv - av;
+      });
+      sorted.forEach((r, i) => { rankMap[r[0]] = i + 1; });
+    }
+
+    const showTiers = crossSortCol === null || crossSortCol === 0;
+
+    let html = '';
+    let lastTier = null;
+    rows.forEach(row => {
+      const [name, csr, rt, tokens, rl, ti, tm, do_, en, sq, fa, tier, isBest, isSota] = row;
+      if (showTiers && tier !== lastTier) {
+        html += `<tr class="tier-row"><td colspan="11"><em>${tier}</em></td></tr>`;
+        lastTier = tier;
+      }
+      const rank = rankMap[name];
+      const rankBadge = rank ? `<span class="cell-rank">#${rank}</span>` : '';
+      const fmt = (v, col) => {
+        if (v === null) return '—';
+        const isBestVal = best[col] !== undefined && Math.abs(v - best[col]) < 0.001;
+        const val = col === 3 ? Math.round(v).toString() : v.toFixed(2);
+        if (isBestVal) return `<span class="cell-best">${val}</span>`;
+        return val;
+      };
+      const highlight = (col) => col === crossSortCol ? 'background:rgba(99,179,237,0.08);' : '';
+      const rowClass = isBest && showTiers ? ' class="best"' : isSota && showTiers ? ' class="sota"' : '';
+      const displayName = isBest ? `<strong>${name}</strong>` : name;
+      html += `<tr${rowClass}>
+        <td>${displayName}${rankBadge}</td>
+        <td style="${highlight(1)}">${fmt(csr,1)}</td>
+        <td style="${highlight(2)}">${fmt(rt,2)}</td>
+        <td style="${highlight(3)}">${fmt(tokens,3)}</td>
+        <td>${fmt(rl,4)}</td>
+        <td>${fmt(ti,5)}</td>
+        <td>${fmt(tm,6)}</td>
+        <td>${fmt(do_,7)}</td>
+        <td>${fmt(en,8)}</td>
+        <td>${fmt(sq,9)}</td>
+        <td style="${highlight(10)}">${fmt(fa,10)}</td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+  }
+
+  renderCross();
+
+  function toggleBenchBrowser() {
+    const browser = document.getElementById('bench-browser');
+    const btn = document.getElementById('bench-toggle-btn');
+    const open = browser.style.display === 'none';
+    browser.style.display = open ? 'block' : 'none';
+    btn.textContent = open ? 'Hide Scenarios ▴' : 'Browse Scenarios ▾';
+  }
+</script>
+
+</body>
+</html>
