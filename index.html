@@ -95,7 +95,7 @@
     .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 
     /* ── LAYOUT ── */
-    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+    .container { max-width: 1440px; margin: 0 auto; padding: 0 24px; }
     section { padding: 64px 0; }
     section + section { border-top: 1px solid var(--border); }
 
@@ -541,9 +541,8 @@
 <!-- ══════════ HERO ══════════ -->
 <header class="hero">
   <div class="venue">IROS 2026 &nbsp;·&nbsp; Autonomous Driving</div>
-  <h1>Chat2Scenic: An Iterative <span>RAG-Based</span> Framework for<br/>Automated Driving Scenario Generation</h1>
-  <p class="authors">Anonymous Authors</p>
-  <p class="affiliation">Anonymous Institution &nbsp;·&nbsp; Under Review</p>
+  <h1>Chat2Scenic: An Iterative <span>RAG-Based</span> Framework<br/>for Automated Driving Scenario Generation</h1>
+  <p class="authors">Anonymous Authors &nbsp;·&nbsp; Anonymous Institution &nbsp;·&nbsp; Under Review</p>
   <div class="btn-row">
     <a href="#" class="btn btn-white">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6M4.5 19.5l15-15M19.5 4.5l-15 15"/></svg>
@@ -561,9 +560,9 @@
 </header>
 
 <!-- ══════════ CONCEPT FIGURE ══════════ -->
-<div class="container">
+<div style="max-width:1280px;margin:0 auto;padding:0 24px;">
   <figure class="fig" style="margin-top:48px;">
-    <img src="static/images/framework.png" alt="Chat2Scenic Framework Architecture" />
+    <img src="static/images/framework_hd-1.png" alt="Chat2Scenic Framework Architecture" style="max-width:100%;width:100%;" />
     <figcaption><strong>Figure 1.</strong> Chat2Scenic framework architecture showing the Interactive Module, RAG Module, and Generation Module with iterative component-wise generation pipeline.</figcaption>
   </figure>
 </div>
@@ -573,9 +572,9 @@
   <div class="container">
     <h2>Abstract</h2>
     <div class="abstract-box">
-      Validating autonomous driving systems requires diverse, regulation-compliant test scenarios. Existing automated approaches rely on simplified inputs rather than complex regulatory descriptions, and face a fundamental trade-off: retrieval-assemble methods achieve reasonable compilation rates but lack scalability, while retrieval-based full-script generation suffers from low compilation success on diverse inputs.
+      Validating autonomous driving systems requires diverse, regulation-compliant test scenarios. In simulation-based testing, scenarios are defined as executable DSL scripts that parametrically specify road topology, actor behaviors, and environmental conditions for simulators such as CARLA. Yet automatically generating such scripts from complex regulatory descriptions remains an open challenge, and existing approaches face fundamental trade-offs: retrieval-assemble methods achieve reasonable compilation rates but lack scalability, while retrieval-based full-script generation suffers from low compilation success.
       <br/><br/>
-      We present <strong>Chat2Scenic</strong>, an iterative retrieval-augmented framework that generates executable Scenic scenario scripts directly from natural language regulatory descriptions. Chat2Scenic provides a chatbot interface for interactive scenario refinement and integrates a dual-retriever RAG architecture grounded in regulatory knowledge and DSL syntax. We additionally propose the first regulation-grounded benchmark comprising <strong>123 scenarios</strong> drawn from NHTSA, United Nations Vehicle Regulations, and the CARLA Leaderboard, together with dedicated metrics for framework-level and application-level evaluation. Chat2Scenic achieves a <strong>Compilation Success Rate of 76.42%</strong> and a <strong>Framework Accuracy of 58.17%</strong>, significantly outperforming state-of-the-art methods.
+      We present <strong>Chat2Scenic</strong>, the first iterative retrieval-augmented framework to automatically translate natural language regulatory descriptions into executable Scenic DSL scripts. Chat2Scenic provides a chatbot interface for interactive scenario refinement and integrates RAG to ground scenario generation in regulatory knowledge and DSL syntax. We further propose an open benchmark comprising <strong>123 scenarios</strong> drawn from NHTSA, United Nations Vehicle Regulations, and the CARLA Leaderboard. Chat2Scenic achieves a <strong>Compilation Success Rate of 76.42%</strong> and a <strong>Framework Accuracy of 58.17%</strong>, outperforming retrieval-assemble (30% CSR, 11.03% FA) and retrieval full-script generation (16.26% CSR, 10.08% FA). We release our open-source code to facilitate future developments.
     </div>
   </div>
 </section>
@@ -588,17 +587,17 @@
       <div class="contrib-card">
         <div class="num">1</div>
         <h3>Chat2Scenic Framework</h3>
-        <p>A chatbot-based iterative component-wise generation framework combining Contextual Prompting, Chain-of-Thought, In-Context Learning, and RAG-ICL — outperforming SOTA in compilation success rate, scenario quality, and framework accuracy.</p>
+        <p>We propose Chat2Scenic, a chatbot-based iterative component-wise generation framework with advanced prompting techniques and RAG, outperforming SOTA methods with released code in compilation success rate, semantic accuracy, and framework accuracy.</p>
       </div>
       <div class="contrib-card">
         <div class="num">2</div>
         <h3>Regulation-Grounded Benchmark</h3>
-        <p>The first benchmark of 123 ADS scenario descriptions sourced from the CARLA Leaderboard, NHTSA crash/pre-crash datasets, and UN Vehicle Regulations (R152, R157, R171), with dedicated evaluation metrics.</p>
+        <p>We curate 120+ ADS scenario descriptions from the CARLA Leaderboard, NHTSA, and United Nations Vehicle Regulations, and propose dedicated metrics to evaluate both framework-level performance (e.g., compilation success rate and framework accuracy) and application-level performance (semantic accuracy).</p>
       </div>
       <div class="contrib-card">
         <div class="num">3</div>
         <h3>Comprehensive Evaluation</h3>
-        <p>Systematic ablation across 12 prompting configurations, cross-model evaluation spanning 13 proprietary and open-source LLMs, and direct comparison against SOTA retrieval-assemble and retrieval-generation baselines.</p>
+        <p>We evaluate Chat2Scenic across closed- and open-source LLMs, conduct ablation studies on prompting techniques, and benchmark against SOTA methods.</p>
       </div>
     </div>
   </div>
@@ -626,6 +625,13 @@
       <button class="demo-nav-btn" onclick="stepDemo(1)">Next &#8594;</button>
     </div>
 
+    <!-- Video control buttons -->
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:10px;">
+      <button onclick="controlAllVideos('play')" style="padding:8px 24px;border-radius:999px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;">▶ Play All</button>
+      <button onclick="controlAllVideos('pause')" style="padding:8px 24px;border-radius:999px;border:2px solid var(--mid);background:var(--white);color:var(--mid);font-size:0.9rem;font-weight:600;cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;">⏸ Pause</button>
+      <button onclick="controlAllVideos('reset')" style="padding:8px 24px;border-radius:999px;border:2px solid var(--mid);background:var(--white);color:var(--mid);font-size:0.9rem;font-weight:600;cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;">↺ Reset</button>
+    </div>
+
     <!-- Three video players -->
     <div id="demo-videos" class="demo-video-grid"></div>
 
@@ -637,7 +643,7 @@
 <!-- ══════════ RESULTS ══════════ -->
 <section>
   <div class="container">
-    <h2>Results</h2>
+    <h2>Quantitative Results</h2>
     <p>All experiments use CARLA 0.9.15 + Scenic 3.1.0 on a Dell Alienware R15 (Intel i7-13700KF, NVIDIA RTX 4090, 128 GB RAM). The best configuration <strong>C11</strong> (CP + CoT + ICL + CodeICL) with Gemini-3-Flash significantly outperforms all baselines.</p>
 
     <div class="metrics-row">
@@ -674,13 +680,13 @@
           </tr>
           <tr>
             <th>CodeICL</th><th>DocICL</th>
-            <th class="sort-th" data-col="9"  data-asc="false" onclick="sortAblation(9)">RL <span class="sort-icon">⇅</span></th>
-            <th class="sort-th" data-col="10" data-asc="false" onclick="sortAblation(10)">TI <span class="sort-icon">⇅</span></th>
-            <th class="sort-th" data-col="11" data-asc="false" onclick="sortAblation(11)">TM <span class="sort-icon">⇅</span></th>
-            <th class="sort-th" data-col="12" data-asc="false" onclick="sortAblation(12)">DO <span class="sort-icon">⇅</span></th>
-            <th class="sort-th" data-col="13" data-asc="false" onclick="sortAblation(13)">EN <span class="sort-icon">⇅</span></th>
-            <th class="sort-th" data-col="14" data-asc="false" onclick="sortAblation(14)">SQ <span class="sort-icon">⇅</span></th>
-            <th class="sort-th" data-col="15" data-asc="false" onclick="sortAblation(15)">FA <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="9"  data-asc="false" onclick="sortAblation(9)">RL ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="10" data-asc="false" onclick="sortAblation(10)">TI ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="11" data-asc="false" onclick="sortAblation(11)">TM ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="12" data-asc="false" onclick="sortAblation(12)">DO ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="13" data-asc="false" onclick="sortAblation(13)">EN ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="14" data-asc="false" onclick="sortAblation(14)">SQ ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="15" data-asc="false" onclick="sortAblation(15)">FA ↑ <span class="sort-icon">⇅</span></th>
           </tr>
         </thead>
         <tbody id="ablation-tbody"></tbody>
@@ -725,8 +731,13 @@
             <th colspan="7" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);">Scenario Alignment ↑</th>
           </tr>
           <tr>
-            <th>RL</th><th>TI</th><th>TM</th><th>DO</th><th>EN</th><th>SQ</th>
-            <th class="sort-th" data-col="10" onclick="sortCross(10)">FA <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="4" onclick="sortCross(4)">RL ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="5" onclick="sortCross(5)">TI ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="6" onclick="sortCross(6)">TM ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="7" onclick="sortCross(7)">DO ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="8" onclick="sortCross(8)">EN ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="9" onclick="sortCross(9)">SQ ↑ <span class="sort-icon">⇅</span></th>
+            <th class="sort-th" data-col="10" onclick="sortCross(10)">FA ↑ <span class="sort-icon">⇅</span></th>
           </tr>
         </thead>
         <tbody id="cross-tbody"></tbody>
@@ -787,6 +798,7 @@
   </div>
 </section>
 
+
 <!-- ══════════ BIBTEX ══════════ -->
 <section>
   <div class="container">
@@ -796,7 +808,7 @@
   title     = {Chat2Scenic: An Iterative RAG-Based Framework
                for Automated Driving Scenario Generation},
   author    = {Anonymous Authors},
-  booktitle = {Proceedings of the IEEE/RSJ International Conference
+  booktitle = {Submitted to the IEEE/RSJ International Conference
                on Intelligent Robots and Systems (IROS)},
   year      = {2026},
   note      = {Under review}
@@ -1364,6 +1376,10 @@
           desc: 'The ego vehicle follows a lead car that suddenly swerves into the adjacent lane to avoid a stationary motorcycle or heavy truck positioned in the center of the lane.',
           dir: 'carla/Self_Gemini_3flash_R1__UN_R171__scenario_018__Town05__2026-01-20_12-13-52_345',
           stem: 'Self_Gemini_3flash_R1__UN_R171__scenario_018__Town05' },
+        { id: 'Scenario 022', town: 'Town05',
+          desc: 'A target vehicle in an adjacent lane performs a full lateral displacement of 3.5 meters to merge into the path of the ego vehicle with a lateral deviation of no more than 0.2 meters.',
+          dir: 'carla/Self_Gemini_3flash_R1__UN_R171__scenario_022__Town05__2026-01-20_12-15-01_293',
+          stem: 'Self_Gemini_3flash_R1__UN_R171__scenario_022__Town05' },
         { id: 'Scenario 031', town: 'Town05',
           desc: 'The ego vehicle travels at a constant speed in a straight lane while a pedestrian target emerges from the side and crosses perpendicular to the vehicle\'s path at a steady 5 km/h, requiring the ego vehicle to detect the pedestrian and execute an autonomous braking response to avoid a collision.',
           dir: 'carla/Self_Gemini_3flash_R1__UN_R171__scenario_031__Town05__2026-01-20_12-17-17_990',
@@ -1398,8 +1414,6 @@
   }
 
   function renderDemo() {
-    const old = document.getElementById('demo-sync-bar');
-    if (old) old.remove();
     const scenarios = DEMO_CATS[demoCat].scenarios;
     const s = scenarios[demoIdx];
     const total = scenarios.length;
@@ -1410,46 +1424,33 @@
 
     const views = ['BEV', 'FPV', 'TPV'];
     const labels = { FPV: 'First-Person View', BEV: "Bird's-Eye View", TPV: 'Third-Person View' };
-    const ts = s.dir.split('__').slice(-1)[0];
     document.getElementById('demo-videos').innerHTML = views.map(v => {
+      // find matching file by view name in the directory
+      const ts = s.dir.split('__').slice(-1)[0]; // timestamp part
       const src = `${s.dir}/${s.stem}__${v}__${ts}.mp4`;
       return `<div class="demo-video-wrap">
         <div class="demo-video-label">${labels[v]}</div>
-        <video class="demo-vid" data-view="${v}" muted playsinline preload="metadata">
+        <video controls muted playsinline preload="metadata">
           <source src="${src}" type="video/mp4">
         </video>
       </div>`;
     }).join('');
-
-    // Add sync controls bar
-    document.getElementById('demo-videos').insertAdjacentHTML('afterend', `
-      <div id="demo-sync-bar" style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;">
-        <button class="demo-nav-btn" id="sync-play" onclick="syncPlay()" style="min-width:90px;">▶ Play All</button>
-        <button class="demo-nav-btn" id="sync-pause" onclick="syncPause()" style="min-width:90px;">⏸ Pause All</button>
-        <button class="demo-nav-btn" onclick="syncRestart()">↺ Restart</button>
-        <span style="font-size:0.82rem;color:var(--muted);">Or use individual video controls — seeking one syncs all.</span>
-      </div>
-    `);
-
-    // Sync logic: play/pause/seek on any video mirrors to others
-    const vids = () => [...document.querySelectorAll('.demo-vid')];
-    let syncing = false;
-    vids().forEach(v => {
-      v.addEventListener('play', () => { if (syncing) return; syncing=true; vids().forEach(o => { if(o!==v && o.paused) o.play(); }); syncing=false; });
-      v.addEventListener('pause', () => { if (syncing) return; syncing=true; vids().forEach(o => { if(o!==v && !o.paused) o.pause(); }); syncing=false; });
-      v.addEventListener('seeked', () => { if (syncing) return; syncing=true; vids().forEach(o => { if(o!==v) o.currentTime=v.currentTime; }); syncing=false; });
-    });
 
     document.getElementById('demo-desc').innerHTML = `
       <div class="demo-scen-id">${DEMO_CATS[demoCat].label}</div>
       ${s.desc}`;
   }
 
-  function syncPlay()    { document.querySelectorAll('.demo-vid').forEach(v => v.play()); }
-  function syncPause()   { document.querySelectorAll('.demo-vid').forEach(v => v.pause()); }
-  function syncRestart() { document.querySelectorAll('.demo-vid').forEach(v => { v.currentTime=0; v.play(); }); }
-
   renderDemo();
+
+  function controlAllVideos(action) {
+    const videos = document.querySelectorAll('#demo-videos video');
+    videos.forEach(v => {
+      if (action === 'play')  { v.play(); }
+      else if (action === 'pause') { v.pause(); }
+      else if (action === 'reset') { v.pause(); v.currentTime = 0; }
+    });
+  }
 
   function toggleBenchBrowser() {
     const browser = document.getElementById('bench-browser');
