@@ -278,6 +278,39 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
+    .demo-video-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 6px;
+    }
+    .demo-video-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .demo-video-label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); text-align: center; text-transform: uppercase; }
+    .demo-video-wrap video { width: 100%; border-radius: 10px; background: #000; max-height: 240px; object-fit: cover; }
+    .demo-desc {
+      margin-top: 18px;
+      background: rgba(255,255,255,0.05);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      font-size: 0.93rem;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    .demo-desc .demo-scen-id { font-size: 0.78rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; margin-bottom: 4px; }
+    .demo-nav-btn {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: inherit;
+      padding: 7px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .demo-nav-btn:hover { background: rgba(255,255,255,0.13); }
+    .demo-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    @media(max-width:700px) { .demo-video-grid { grid-template-columns: 1fr; } }
     .tab-btn {
       padding: 6px 18px;
       border-radius: 999px;
@@ -571,6 +604,36 @@
   </div>
 </section>
 
+<!-- ══════════ QUALITATIVE EXAMPLES ══════════ -->
+<section id="demos">
+  <div class="container">
+    <h2>Qualitative Examples</h2>
+    <p>Generated scenarios rendered in CARLA across benchmark categories. Each scenario shows all three camera views — BEV (Bird's-Eye), FPV (First-Person), TPV (Third-Person) — with the original benchmark description.</p>
+
+    <!-- Category tabs -->
+    <div class="bench-tabs" id="demo-cat-tabs" style="margin-bottom:0;">
+      <button class="bench-tab active" onclick="selectDemoCat('carla',this)">CARLA Leaderboard</button>
+      <button class="bench-tab" onclick="selectDemoCat('crash',this)">NHTSA Crash</button>
+      <button class="bench-tab" onclick="selectDemoCat('precrash',this)">NHTSA PreCrash</button>
+      <button class="bench-tab" onclick="selectDemoCat('r152',this)">UN R152</button>
+      <button class="bench-tab" onclick="selectDemoCat('r171',this)">UN R171</button>
+    </div>
+
+    <!-- Scenario navigator -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px;">
+      <button class="demo-nav-btn" onclick="stepDemo(-1)">&#8592; Prev</button>
+      <span id="demo-counter" style="font-size:0.9rem;color:var(--muted);"></span>
+      <button class="demo-nav-btn" onclick="stepDemo(1)">Next &#8594;</button>
+    </div>
+
+    <!-- Three video players -->
+    <div id="demo-videos" class="demo-video-grid"></div>
+
+    <!-- Description -->
+    <div id="demo-desc" class="demo-desc"></div>
+  </div>
+</section>
+
 <!-- ══════════ RESULTS ══════════ -->
 <section>
   <div class="container">
@@ -721,39 +784,6 @@
       <div id="bench-grid" class="bench-grid"></div>
       <div id="bench-empty" class="bench-empty" style="display:none;">No scenarios match your search.</div>
     </div>
-  </div>
-</section>
-
-<!-- ══════════ QUALITATIVE EXAMPLES ══════════ -->
-<section>
-  <div class="container">
-    <h2>Qualitative Examples</h2>
-    <p>Generated scenarios visualized in CARLA across three benchmark sources. Toggle between First-Person View (FPV) and Bird's-Eye View (BEV).</p>
-
-    <div class="gallery-tabs">
-      <button class="tab-btn active" onclick="switchView('fpv', this)">First-Person View (FPV)</button>
-      <button class="tab-btn" onclick="switchView('bev', this)">Bird's-Eye View (BEV)</button>
-    </div>
-
-    <div id="panel-fpv" class="view-panel active">
-      <div class="gallery-grid">
-        <img src="static/images/examples/fpv_1.png" alt="FPV Example 1" />
-        <img src="static/images/examples/fpv_2.png" alt="FPV Example 2" />
-        <img src="static/images/examples/fpv_3.png" alt="FPV Example 3" />
-        <img src="static/images/examples/fpv_4.png" alt="FPV Example 4" />
-      </div>
-    </div>
-
-    <div id="panel-bev" class="view-panel">
-      <div class="gallery-grid">
-        <img src="static/images/examples/bev_1.png" alt="BEV Example 1" />
-        <img src="static/images/examples/bev_2.png" alt="BEV Example 2" />
-        <img src="static/images/examples/bev_3.png" alt="BEV Example 3" />
-        <img src="static/images/examples/bev_4.png" alt="BEV Example 4" />
-      </div>
-    </div>
-
-    <p style="font-size:0.85rem; color:var(--muted); margin-top:12px;">Scenarios sourced from CARLA Leaderboard, UN R171, and NHTSA Crash datasets. All rendered in CARLA 0.9.15.</p>
   </div>
 </section>
 
@@ -1236,6 +1266,194 @@
   }
 
   renderCross();
+
+  /* ── Video Demo Browser ── */
+  const DEMO_CATS = {
+    carla: {
+      label: 'CARLA Leaderboard',
+      scenarios: [
+        { id: 'Scenario 002', town: 'Town05',
+          desc: 'The ego-vehicle is performing an unprotected left turn at an intersection, yielding to oncoming traffic. This scenario occurs at both signalized and non-signalized junctions.',
+          dir: 'carla/Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_002__Town05__2026-01-20_11-43-26_303',
+          stem: 'Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_002__Town05' },
+        { id: 'Scenario 003', town: 'Town05',
+          desc: 'The ego-vehicle is performing a right turn at an intersection, yielding to crossing traffic. This scenario occurs at both signalized and non-signalized junctions.',
+          dir: 'carla/Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_003__Town05__2026-01-20_11-43-43_295',
+          stem: 'Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_003__Town05' },
+        { id: 'Scenario 004', town: 'Town05',
+          desc: 'The ego-vehicle needs to negotiate with other vehicles to cross an unsignalized intersection. In this situation it is assumed that the first to enter the intersection has priority.',
+          dir: 'carla/Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_004__Town05__2026-01-20_11-44-00_047',
+          stem: 'Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_004__Town05' },
+        { id: 'Scenario 005', town: 'Town05',
+          desc: 'The ego-vehicle is going straight at an intersection but a crossing vehicle runs a red light, forcing the ego-vehicle to avoid the collision. This scenario occurs at both signalized and non-signalized junctions.',
+          dir: 'carla/Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_005__Town05__2026-01-20_11-44-15_677',
+          stem: 'Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_005__Town05' },
+        { id: 'Scenario 022', town: 'Town05',
+          desc: 'While performing a maneuver, the ego-vehicle encounters a stopped vehicle in the road and must perform an emergency brake or an avoidance maneuver.',
+          dir: 'carla/Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_022__Town05__2026-01-20_11-49-45_070',
+          stem: 'Self_Gemini_3flash_R1__CARLA_Leaderboard__scenario_022__Town05' },
+      ]
+    },
+    crash: {
+      label: 'NHTSA Crash',
+      scenarios: [
+        { id: 'Scenario 001', town: 'Town05',
+          desc: 'A pedestrian crossing a multi-lane roadway was struck by vehicle. The driver was looking for other vehicles and traffic controls, but did not see the pedestrian.',
+          dir: 'carla/Self_Gemini_3flash_R1__NHTSA_Crash__scenario_001__Town05__2026-01-20_11-50-42_658',
+          stem: 'Self_Gemini_3flash_R1__NHTSA_Crash__scenario_001__Town05' },
+        { id: 'Scenario 002', town: 'Town10HD',
+          desc: 'Driver ran the red light. The driver saw the light turn yellow but decided to continue through the intersection.',
+          dir: 'carla/Self_Gemini_3flash_R1__NHTSA_Crash__scenario_002__Town10HD_Opt__2026-01-20_11-51-20_199',
+          stem: 'Self_Gemini_3flash_R1__NHTSA_Crash__scenario_002__Town10HD_Opt' },
+        { id: 'Scenario 006', town: 'Town05',
+          desc: 'Vehicle B was following Vehicle A too closely. Vehicle A had to stop quickly; B could not stop in time and rear-ended A.',
+          dir: 'carla/Self_Gemini_3flash_R2__NHTSA_Crash__scenario_006__Town05__2026-01-15_19-05-47_123',
+          stem: 'Self_Gemini_3flash_R2__NHTSA_Crash__scenario_006__Town05' },
+        { id: 'Scenario 007', town: 'Town05',
+          desc: 'A northbound vehicle, A, was stopped waiting at a red traffic signal in an urban area on a major artery. Another vehicle, B, coming from some distance behind, didn\'t notice that A was stopped and could not stop in time.',
+          dir: 'carla/Self_Gemini_3flash_R1__NHTSA_Crash__scenario_007__Town05__2026-01-20_11-52-31_540',
+          stem: 'Self_Gemini_3flash_R1__NHTSA_Crash__scenario_007__Town05' },
+        { id: 'Scenario 016', town: 'Town05',
+          desc: 'Vehicle A was waiting to turn left. Driver A observed B approaching from the opposite direction, but thought there was enough time to complete the left turn. Driver A misjudged vehicle B\'s distance and was struck by Vehicle B.',
+          dir: 'carla/Self_Gemini_3flash_R1__NHTSA_Crash__scenario_016__Town05__2026-01-20_11-55-14_095',
+          stem: 'Self_Gemini_3flash_R1__NHTSA_Crash__scenario_016__Town05' },
+      ]
+    },
+    precrash: {
+      label: 'NHTSA PreCrash',
+      scenarios: [
+        { id: 'Scenario 001', town: 'Town05',
+          desc: 'Vehicle is turning left or right at an intersection-related area, in daylight, under clear weather conditions, with a posted speed limit of 45 mph or less, and then loses control due to wet or slippery roads and runs off the road.',
+          dir: 'carla/Self_Gemini_3flash_R1__NHTSA_PreCrash__scenario_001__Town05__2026-01-20_11-55-29_481',
+          stem: 'Self_Gemini_3flash_R1__NHTSA_PreCrash__scenario_001__Town05' },
+        { id: 'Scenario 010', town: 'Town05',
+          desc: 'Vehicle is turning right in an urban area, in daylight, under clear weather conditions, with a posted speed limit of 25 mph; and encounters a pedalcyclist at an intersection.',
+          dir: 'carla/Self_Gemini_Flash_v3__NHTSA_PreCrash__scenario_010__Town05__2026-01-23_13-20-12_527',
+          stem: 'Self_Gemini_Flash_v3__NHTSA_PreCrash__scenario_010__Town05' },
+        { id: 'Scenario 022', town: 'Town05',
+          desc: 'Vehicle is going straight in an urban area, in daylight, under clear weather conditions, at an intersection-related location with a posted speed limit of 35 mph; and closes in on a stopped lead vehicle.',
+          dir: 'carla/Self_Gemini_3flash_R1__NHTSA_PreCrash__scenario_022__Town05__2026-01-20_12-01-18_620',
+          stem: 'Self_Gemini_3flash_R1__NHTSA_PreCrash__scenario_022__Town05' },
+        { id: 'Scenario 023', town: 'Town05',
+          desc: 'Vehicle is turning left in an urban area, in daylight, under clear weather conditions, at a signalized intersection with a posted speed limit of 35 mph; and cuts across the path of another vehicle straight crossing from an opposite direction.',
+          dir: 'carla/Self_Gemini_3flash_R1__NHTSA_PreCrash__scenario_023__Town05__2026-01-20_12-01-35_638',
+          stem: 'Self_Gemini_3flash_R1__NHTSA_PreCrash__scenario_023__Town05' },
+        { id: 'Scenario 024', town: 'Town05',
+          desc: 'Vehicle is turning right in an urban area, in daylight, under clear weather conditions, at a signalized intersection with a posted speed limit of 35 mph; and turns into the same direction of another vehicle crossing straight initially from a lateral direction.',
+          dir: 'carla/Self_Gemini_3flash_R3__NHTSA_PreCrash__scenario_024__Town05__2026-01-15_20-32-59_325',
+          stem: 'Self_Gemini_3flash_R3__NHTSA_PreCrash__scenario_024__Town05' },
+      ]
+    },
+    r152: {
+      label: 'UN R152',
+      scenarios: [
+        { id: 'Scenario 002', town: 'Town05',
+          desc: 'The subject vehicle follows a forward vehicle. After that, the forward vehicle turns right or left at a corner, and the subject vehicle goes straight.',
+          dir: 'carla/Self_Gemini_3flash_R1__UN_R152__scenario_002__Town05__2026-01-20_12-04-16_189',
+          stem: 'Self_Gemini_3flash_R1__UN_R152__scenario_002__Town05' },
+      ]
+    },
+    r171: {
+      label: 'UN R171',
+      scenarios: [
+        { id: 'Scenario 006', town: 'Town04',
+          desc: 'The ego vehicle begins a lane change into a center lane at the same time a vehicle from the furthest lane starts merging into that same target space, forcing the ego vehicle to detect the potential collision risk and either abort the maneuver or adjust its path to avoid the other merging vehicle.',
+          dir: 'carla/Self_Gemini_3flash_R1__UN_R171__scenario_006__Town04__2026-01-20_12-10-13_764',
+          stem: 'Self_Gemini_3flash_R1__UN_R171__scenario_006__Town04' },
+        { id: 'Scenario 018', town: 'Town05',
+          desc: 'The ego vehicle follows a lead car that suddenly swerves into the adjacent lane to avoid a stationary motorcycle or heavy truck positioned in the center of the lane.',
+          dir: 'carla/Self_Gemini_3flash_R1__UN_R171__scenario_018__Town05__2026-01-20_12-13-52_345',
+          stem: 'Self_Gemini_3flash_R1__UN_R171__scenario_018__Town05' },
+        { id: 'Scenario 022', town: 'Town05',
+          desc: 'A target vehicle in an adjacent lane performs a full lateral displacement of 3.5 meters to merge into the path of the ego vehicle with a lateral deviation of no more than 0.2 meters.',
+          dir: 'carla/Self_Gemini_3flash_R1__UN_R171__scenario_022__Town05__2026-01-20_12-15-01_293',
+          stem: 'Self_Gemini_3flash_R1__UN_R171__scenario_022__Town05' },
+        { id: 'Scenario 031', town: 'Town05',
+          desc: 'The ego vehicle travels at a constant speed in a straight lane while a pedestrian target emerges from the side and crosses perpendicular to the vehicle\'s path at a steady 5 km/h, requiring the ego vehicle to detect the pedestrian and execute an autonomous braking response to avoid a collision.',
+          dir: 'carla/Self_Gemini_3flash_R1__UN_R171__scenario_031__Town05__2026-01-20_12-17-17_990',
+          stem: 'Self_Gemini_3flash_R1__UN_R171__scenario_031__Town05' },
+        { id: 'Scenario 034', town: 'Town05',
+          desc: 'While the ego vehicle travels at its prescribed test speed through an intersection, a bicycle target emerges from an obstructed area and crosses perpendicular to the ego vehicle\'s path at a constant speed of 15 km/h, requiring the system to detect the cyclist and execute an autonomous maneuver to avoid a collision.',
+          dir: 'carla/Self_Gemini_Flash_v2__UN_R171__scenario_034__Town05__2026-01-23_01-26-43_190',
+          stem: 'Self_Gemini_Flash_v2__UN_R171__scenario_034__Town05' },
+        { id: 'Scenario 035', town: 'Town05',
+          desc: 'The ego vehicle approaches an intersection in a straight line and initiates a turn across the path of an oncoming passenger car or motorcycle traveling at up to 60 km/h, requiring the system to detect the oncoming threat and intervene to prevent a collision.',
+          dir: 'carla/Self_Gemini_3flash_R3__UN_R171__scenario_035__Town05__2026-01-15_20-48-27_597',
+          stem: 'Self_Gemini_3flash_R3__UN_R171__scenario_035__Town05' },
+      ]
+    }
+  };
+
+  let demoCat = 'carla';
+  let demoIdx = 0;
+
+  function selectDemoCat(cat, btn) {
+    demoCat = cat;
+    demoIdx = 0;
+    document.querySelectorAll('#demo-cat-tabs .bench-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDemo();
+  }
+
+  function stepDemo(dir) {
+    const scenarios = DEMO_CATS[demoCat].scenarios;
+    demoIdx = Math.max(0, Math.min(scenarios.length - 1, demoIdx + dir));
+    renderDemo();
+  }
+
+  function renderDemo() {
+    const old = document.getElementById('demo-sync-bar');
+    if (old) old.remove();
+    const scenarios = DEMO_CATS[demoCat].scenarios;
+    const s = scenarios[demoIdx];
+    const total = scenarios.length;
+
+    document.getElementById('demo-counter').textContent = `${demoIdx + 1} / ${total}`;
+    document.querySelector('[onclick="stepDemo(-1)"]').disabled = demoIdx === 0;
+    document.querySelector('[onclick="stepDemo(1)"]').disabled = demoIdx === total - 1;
+
+    const views = ['BEV', 'FPV', 'TPV'];
+    const labels = { FPV: 'First-Person View', BEV: "Bird's-Eye View", TPV: 'Third-Person View' };
+    const ts = s.dir.split('__').slice(-1)[0];
+    document.getElementById('demo-videos').innerHTML = views.map(v => {
+      const src = `${s.dir}/${s.stem}__${v}__${ts}.mp4`;
+      return `<div class="demo-video-wrap">
+        <div class="demo-video-label">${labels[v]}</div>
+        <video class="demo-vid" data-view="${v}" muted playsinline preload="metadata">
+          <source src="${src}" type="video/mp4">
+        </video>
+      </div>`;
+    }).join('');
+
+    // Add sync controls bar
+    document.getElementById('demo-videos').insertAdjacentHTML('afterend', `
+      <div id="demo-sync-bar" style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap;">
+        <button class="demo-nav-btn" id="sync-play" onclick="syncPlay()" style="min-width:90px;">▶ Play All</button>
+        <button class="demo-nav-btn" id="sync-pause" onclick="syncPause()" style="min-width:90px;">⏸ Pause All</button>
+        <button class="demo-nav-btn" onclick="syncRestart()">↺ Restart</button>
+        <span style="font-size:0.82rem;color:var(--muted);">Or use individual video controls — seeking one syncs all.</span>
+      </div>
+    `);
+
+    // Sync logic: play/pause/seek on any video mirrors to others
+    const vids = () => [...document.querySelectorAll('.demo-vid')];
+    let syncing = false;
+    vids().forEach(v => {
+      v.addEventListener('play', () => { if (syncing) return; syncing=true; vids().forEach(o => { if(o!==v && o.paused) o.play(); }); syncing=false; });
+      v.addEventListener('pause', () => { if (syncing) return; syncing=true; vids().forEach(o => { if(o!==v && !o.paused) o.pause(); }); syncing=false; });
+      v.addEventListener('seeked', () => { if (syncing) return; syncing=true; vids().forEach(o => { if(o!==v) o.currentTime=v.currentTime; }); syncing=false; });
+    });
+
+    document.getElementById('demo-desc').innerHTML = `
+      <div class="demo-scen-id">${DEMO_CATS[demoCat].label}</div>
+      ${s.desc}`;
+  }
+
+  function syncPlay()    { document.querySelectorAll('.demo-vid').forEach(v => v.play()); }
+  function syncPause()   { document.querySelectorAll('.demo-vid').forEach(v => v.pause()); }
+  function syncRestart() { document.querySelectorAll('.demo-vid').forEach(v => { v.currentTime=0; v.play(); }); }
+
+  renderDemo();
 
   function toggleBenchBrowser() {
     const browser = document.getElementById('bench-browser');
