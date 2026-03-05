@@ -32,15 +32,16 @@
 
     /* ── HERO ── */
     .hero {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 55%, #60a5fa 100%);
-      color: var(--white);
+      background: var(--white);
+      color: var(--dark);
       padding: 72px 24px 60px;
       text-align: center;
+      border-bottom: 1px solid var(--border);
     }
     .hero .venue {
       display: inline-block;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
+      background: var(--blue-light);
+      border: 1px solid var(--blue);
       border-radius: 999px;
       padding: 4px 16px;
       font-size: 0.85rem;
@@ -48,6 +49,7 @@
       letter-spacing: 0.05em;
       margin-bottom: 20px;
       text-transform: uppercase;
+      color: var(--blue);
     }
     .hero h1 {
       font-family: 'Source Serif 4', serif;
@@ -56,17 +58,18 @@
       line-height: 1.3;
       max-width: 1100px;
       margin: 0 auto 28px;
+      color: var(--dark);
     }
-    .hero h1 span { color: #93c5fd; }
+    .hero h1 span { color: var(--blue); }
 
     .authors {
       font-size: 1rem;
-      color: rgba(255,255,255,0.85);
+      color: var(--mid);
       margin-bottom: 10px;
     }
     .affiliation {
       font-size: 0.85rem;
-      color: rgba(255,255,255,0.65);
+      color: var(--muted);
       margin-bottom: 36px;
     }
 
@@ -88,9 +91,9 @@
       transition: transform 0.15s, box-shadow 0.15s;
     }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
-    .btn-white  { background: var(--white); color: var(--blue); }
-    .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.6); }
-    .btn-outline:hover { background: rgba(255,255,255,0.1); }
+    .btn-white  { background: var(--blue); color: var(--white); }
+    .btn-outline { background: transparent; color: var(--blue); border: 2px solid var(--blue); }
+    .btn-outline:hover { background: var(--blue-light); }
     .btn-disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
     .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 
@@ -603,6 +606,58 @@
   </div>
 </section>
 
+<!-- ══════════ SYSTEM DEMOS ══════════ -->
+<section>
+  <div class="container">
+    <h2>System Demonstrations</h2>
+    <p>Chat2Scenic ships two interactive tools — a conversational scenario generator and a dedicated human evaluation interface — enabling end-to-end scenario creation and verification.</p>
+
+    <!-- Demo 1: Chatbot GUI -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:40px;height:40px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        </div>
+        <div>
+          <h3 style="margin-bottom:2px;font-size:1.15rem;">Demo 1 — Chatbot &amp; Scenic Code Generation</h3>
+          <span style="display:inline-block;background:var(--blue-light);color:var(--blue);font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;letter-spacing:0.05em;">Interactive Module</span>
+        </div>
+      </div>
+      <p style="max-width:860px;margin-bottom:16px;">
+        The Chat2Scenic chatbot interface allows users to describe any driving scenario in plain natural language. The system iteratively retrieves relevant DSL knowledge via RAG, applies Chain-of-Thought prompting, and generates a component-wise executable <strong>Scenic DSL script</strong> ready for CARLA simulation. Users can refine the scenario through follow-up messages, inspect the generated code, and re-run the simulation — all within a single chat session.
+      </p>
+      <video controls muted playsinline preload="metadata"
+        style="width:100%;max-width:960px;display:block;margin:0 auto;border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 6px 28px rgba(0,0,0,0.10);background:#000;">
+        <source src="GUI/GUI.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <!-- Divider -->
+    <hr style="border:none;border-top:1px solid var(--border);margin:48px 0;">
+
+    <!-- Demo 2: Evaluation GUI -->
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:40px;height:40px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+          <h3 style="margin-bottom:2px;font-size:1.15rem;">Demo 2 — Human Evaluation GUI</h3>
+          <span style="display:inline-block;background:#d1fae5;color:#065f46;font-size:0.75rem;font-weight:700;padding:2px 10px;border-radius:999px;letter-spacing:0.05em;">Scenario Alignment Annotation</span>
+        </div>
+      </div>
+      <p style="max-width:860px;margin-bottom:16px;">
+        To assess <strong>Scenario Alignment</strong>, we built a dedicated annotation tool that presents evaluators with the original benchmark description alongside the CARLA simulation video (BEV, FPV, TPV views). Annotators rate five alignment layers — Road Layout (RL), Traffic Infrastructure (TI), Temporal Modifications (TM), Dynamic Objects (DO), and Environment (EN) — each on a binary pass/fail basis. The aggregated scores feed directly into the <strong>Scenario Quality (SQ)</strong> and <strong>Framework Accuracy (FA)</strong> metrics reported in our results.
+      </p>
+      <video controls muted playsinline preload="metadata"
+        style="width:100%;max-width:960px;display:block;margin:0 auto;border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 6px 28px rgba(0,0,0,0.10);background:#000;">
+        <source src="GUI/Evaluation GUI.mp4" type="video/mp4">
+      </video>
+    </div>
+
+  </div>
+</section>
+
 <!-- ══════════ QUALITATIVE EXAMPLES ══════════ -->
 <section id="demos">
   <div class="container">
@@ -676,7 +731,8 @@
             <th rowspan="2" class="sort-th" data-col="6" data-asc="false" onclick="sortAblation(6)">CSR (%) ↑ <span class="sort-icon">⇅</span></th>
             <th rowspan="2" class="sort-th" data-col="7" data-asc="false" onclick="sortAblation(7)">RT (s) ↓ <span class="sort-icon">⇅</span></th>
             <th rowspan="2" class="sort-th" data-col="8" data-asc="false" onclick="sortAblation(8)">Tokens ↓ <span class="sort-icon">⇅</span></th>
-            <th colspan="7" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);">Scenario Alignment ↑</th>
+            <th colspan="6" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);">Scenario Alignment ↑</th>
+            <th rowspan="2" class="sort-th" data-col="15" data-asc="false" onclick="sortAblation(15)" style="border-left:2px solid rgba(255,255,255,0.3);">FA ↑ <span class="sort-icon">⇅</span></th>
           </tr>
           <tr>
             <th>CodeICL</th><th>DocICL</th>
@@ -686,7 +742,6 @@
             <th class="sort-th" data-col="12" data-asc="false" onclick="sortAblation(12)">DO ↑ <span class="sort-icon">⇅</span></th>
             <th class="sort-th" data-col="13" data-asc="false" onclick="sortAblation(13)">EN ↑ <span class="sort-icon">⇅</span></th>
             <th class="sort-th" data-col="14" data-asc="false" onclick="sortAblation(14)">SQ ↑ <span class="sort-icon">⇅</span></th>
-            <th class="sort-th" data-col="15" data-asc="false" onclick="sortAblation(15)">FA ↑ <span class="sort-icon">⇅</span></th>
           </tr>
         </thead>
         <tbody id="ablation-tbody"></tbody>
@@ -728,7 +783,8 @@
             <th rowspan="2" class="sort-th" data-col="1" onclick="sortCross(1)">CSR (%) ↑ <span class="sort-icon">⇅</span></th>
             <th rowspan="2" class="sort-th" data-col="2" onclick="sortCross(2)">RT (s) ↓ <span class="sort-icon">⇅</span></th>
             <th rowspan="2" class="sort-th" data-col="3" onclick="sortCross(3)">Tokens ↓ <span class="sort-icon">⇅</span></th>
-            <th colspan="7" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);">Scenario Alignment ↑</th>
+            <th colspan="6" style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);">Scenario Alignment ↑</th>
+            <th rowspan="2" class="sort-th" data-col="10" onclick="sortCross(10)" style="border-left:2px solid rgba(255,255,255,0.3);">FA ↑ <span class="sort-icon">⇅</span></th>
           </tr>
           <tr>
             <th class="sort-th" data-col="4" onclick="sortCross(4)">RL ↑ <span class="sort-icon">⇅</span></th>
@@ -737,7 +793,6 @@
             <th class="sort-th" data-col="7" onclick="sortCross(7)">DO ↑ <span class="sort-icon">⇅</span></th>
             <th class="sort-th" data-col="8" onclick="sortCross(8)">EN ↑ <span class="sort-icon">⇅</span></th>
             <th class="sort-th" data-col="9" onclick="sortCross(9)">SQ ↑ <span class="sort-icon">⇅</span></th>
-            <th class="sort-th" data-col="10" onclick="sortCross(10)">FA ↑ <span class="sort-icon">⇅</span></th>
           </tr>
         </thead>
         <tbody id="cross-tbody"></tbody>
@@ -1148,7 +1203,7 @@
         <td style="${highlight(12)}">${fmt(do_,12)}</td>
         <td style="${highlight(13)}">${fmt(en,13)}</td>
         <td style="${highlight(14)}">${fmt(sq,14)}</td>
-        <td style="${highlight(15)}">${fmt(fa,15)}</td>
+        <td style="border-left:2px solid var(--border);${highlight(15)}">${fmt(fa,15)}</td>
       </tr>`;
     });
     tbody.innerHTML = html;
@@ -1271,7 +1326,7 @@
         <td>${fmt(do_,7)}</td>
         <td>${fmt(en,8)}</td>
         <td>${fmt(sq,9)}</td>
-        <td style="${highlight(10)}">${fmt(fa,10)}</td>
+        <td style="border-left:2px solid var(--border);${highlight(10)}">${fmt(fa,10)}</td>
       </tr>`;
     });
     tbody.innerHTML = html;
